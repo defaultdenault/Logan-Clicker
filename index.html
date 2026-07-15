@@ -539,6 +539,36 @@
   }
   .award-tile.locked { border-color: rgba(255,255,255,.07); box-shadow: none; opacity: .4; filter: grayscale(1); }
 
+  /* ================= PRESTIGE ================= */
+  #prestige-cols { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; padding: 0 1.2rem 1.2rem; align-items: start; }
+  .block-note { color: var(--muted); font-size: .72rem; line-height: 1.45; margin-bottom: .5rem; }
+  #rebirth-btn {
+    width: 100%; margin: .4rem 0 .2rem;
+    background: linear-gradient(180deg, #1e4a6b, #123049);
+    border: 1px solid var(--blue);
+    color: #bfe0ff;
+    font-weight: 800; padding: .55rem 0; border-radius: 10px; cursor: pointer;
+    transition: box-shadow .15s;
+  }
+  #rebirth-btn:hover:not(:disabled) { box-shadow: 0 0 16px rgba(90,167,255,.4); }
+  #rebirth-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .meta-item .lvl { font-size: .74rem; font-weight: 800; color: var(--blue); flex-shrink: 0; }
+  .meta-item .lvl.maxed { color: var(--green); }
+  /* rank perks */
+  .rank-row { display: flex; gap: .3rem; margin-top: .35rem; flex-wrap: wrap; align-items: center; }
+  .rank-label { font-size: .62rem; color: var(--muted); }
+  .rank-badge { font-size: .85rem; }
+  .rank-badge.dormant { opacity: .35; }
+  .rank-pick {
+    background: rgba(255,255,255,.06);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px; padding: .18rem .5rem;
+    font-size: .74rem; cursor: pointer;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .rank-pick:hover { border-color: var(--gold); box-shadow: 0 0 8px rgba(245,197,66,.35); }
+  @media (max-width: 1100px) { #prestige-cols { grid-template-columns: 1fr; } }
+
   /* ================= OPTIONS ================= */
   #options-body { max-width: 560px; padding: 0 1.2rem 1.2rem; }
   .opt-btn {
@@ -680,6 +710,7 @@
   <div class="chip tier-chip" id="hud-tier-super"><span class="c-icon">💪</span><span class="c-val">0</span></div>
   <div class="chip tier-chip" id="hud-tier-cosmic"><span class="c-icon">🌠</span><span class="c-val">0</span></div>
   <div class="chip tier-chip" id="hud-tier-god"><span class="c-icon">⚡</span><span class="c-val">0</span></div>
+  <div class="chip tier-chip" id="hud-shards"><span class="c-icon">🔷</span><span><span class="c-val" id="hud-shards-val">0</span></span></div>
   <div class="chip" id="hud-sp"><span class="c-icon">✨</span><span><span class="c-val" id="hud-sp-val">0</span> <span class="c-sub">SP</span></span></div>
   <div class="chip" id="hud-glass"><span class="c-icon">👓</span><span><span class="c-val" id="hud-glass-val">0</span></span></div>
 </div>
@@ -689,6 +720,7 @@
   <button class="nav-btn active" data-screen="scene"><span class="n-icon">🏠</span><span class="n-label">World</span></button>
   <button class="nav-btn" data-screen="worlds"><span class="n-icon">🌌</span><span class="n-label">Travel</span></button>
   <button class="nav-btn" data-screen="skills"><span class="n-icon">🌳</span><span class="n-label">Skills</span></button>
+  <button class="nav-btn" data-screen="prestige"><span class="n-icon">🦋</span><span class="n-label">Prestige</span></button>
   <button class="nav-btn" data-screen="stats"><span class="n-icon">📊</span><span class="n-label">Stats</span></button>
   <button class="nav-btn" data-screen="options"><span class="n-icon">⚙️</span><span class="n-label">Options</span></button>
 </nav>
@@ -757,6 +789,34 @@
     <div id="tree-wrap"><div id="tree-area"><svg id="tree-svg" preserveAspectRatio="none"></svg></div></div>
   </section>
 
+  <!-- PRESTIGE -->
+  <section id="screen-prestige" class="screen">
+    <div class="screen-title">🦋 Prestige</div>
+    <div class="screen-sub">Three loops: Rebirth for tempo, Transcendence for meta-structure, and — one day — something deeper.</div>
+    <div id="prestige-cols">
+      <div class="stat-block" id="rebirth-block">
+        <h3>🔷 Rebirth — the tempo loop</h3>
+        <div class="block-note">Resets your Logans, buildings, and shop upgrades. Keeps evolved Logans, worlds, skills, and everything above. Earn Shards based on this run's earnings.</div>
+        <div id="rebirth-lines"></div>
+        <button id="rebirth-btn">Rebirth</button>
+        <h3 style="margin-top:.9rem">⚒️ The Forge</h3>
+        <div class="block-note">Spend Shards on automation and head starts. Survives Rebirth; consumed by Transcendence.</div>
+        <div id="forge-list"></div>
+      </div>
+      <div class="stat-block" id="transcend-block">
+        <h3>👓 Transcendence — the meta loop</h3>
+        <div class="block-note">Resets the Rebirth layer, evolved Logans, Shards, and the Forge. Keeps worlds, skills, glasses, and the Legacy Tree.</div>
+        <div id="prestige-lines"></div>
+        <h3 style="margin-top:.6rem">Perks</h3>
+        <div id="perk-list"></div>
+        <button id="ascend-btn">Transcend</button>
+        <h3 style="margin-top:.9rem">📜 Legacy Tree</h3>
+        <div class="block-note">Spend Golden Glasses on permanent meta-structure.</div>
+        <div id="legacy-list"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- STATS -->
   <section id="screen-stats" class="screen">
     <div class="screen-title">📊 Stats &amp; Transcendence</div>
@@ -765,13 +825,6 @@
       <div class="stat-block"><h3>Lifetime</h3><div id="stats-life"></div></div>
       <div class="stat-block"><h3>Records</h3><div id="stats-records"></div></div>
       <div class="stat-block"><h3>Production</h3><div id="building-breakdown"></div></div>
-      <div class="stat-block" id="prestige-block">
-        <h3>🦋 Transcendence</h3>
-        <div id="prestige-lines"></div>
-        <h3 style="margin-top:.6rem">Perks</h3>
-        <div id="perk-list"></div>
-        <button id="ascend-btn">Transcend</button>
-      </div>
       <div class="stat-block" id="awards-block">
         <h3>🏆 Awards</h3>
         <div id="awards-summary"></div>
@@ -906,7 +959,7 @@ defUpgrade({ id: "zor-tech",          dim: "zorgon",   name: "Alien Tech",      
 defUpgrade({ id: "zor-beam",          dim: "zorgon",   name: "Abduction Beam",     icon: "🛸", cost: 1e15, kind: "wildMult", mult: 3, desc: "Wild Logan rewards are tripled." });
 defUpgrade({ id: "zor-telepathy",     dim: "zorgon",   name: "Telepathic Clicks",  icon: "🧠", cost: 5e15, kind: "clickCps", pct: 0.05, desc: "Clicks also gain +5% of your Logans per second." });
 defUpgrade({ id: "void-whispers",     dim: "void",     name: "Void Whispers",      icon: "🌑", cost: 2e16, kind: "achRate", val: 0.015, desc: "Achievements give +1.5% CPS each instead of +1%." });
-defUpgrade({ id: "void-horizon",      dim: "void",     name: "Event Horizon",      icon: "⚫", cost: 1e17, kind: "glassRate", val: 0.03, desc: "Golden Glasses give +3% CPS each instead of +2%." });
+defUpgrade({ id: "void-horizon",      dim: "void",     name: "Event Horizon",      icon: "⚫", cost: 1e17, kind: "glassRate", val: 0.75, desc: "Golden Glasses' passive bonus is 50% stronger." });
 defUpgrade({ id: "void-matter",       dim: "void",     name: "Dark Matter",        icon: "✴️", cost: 5e17, kind: "cpsMult", mult: 1.5, desc: "All production +50%. Made of 96% nothing." });
 
 // building tier upgrades
@@ -1076,6 +1129,10 @@ const ACHIEVEMENTS = [
   { id: "v3", name: "Cosmic Being",            icon: "🌠", desc: "Evolve a Cosmic Logan.",               cond: s => s.tiers.cosmic >= 1 },
   { id: "v4", name: "Deus Logan",              icon: "⚡", desc: "Evolve a God Logan.",                  cond: s => s.tiers.god >= 1 },
   { id: "v5", name: "Pantheon",                icon: "🏛️", desc: "Own 10 God Logans.",                   cond: s => s.tiers.god >= 10 },
+  { id: "rb1", name: "Born Again",             icon: "🔷", desc: "Rebirth for the first time.",          cond: s => s.rebirths >= 1 },
+  { id: "rb2", name: "Revolving Door",         icon: "🚪", desc: "Rebirth 25 times.",                    cond: s => s.rebirths >= 25 },
+  { id: "fg1", name: "Smith of Logan",         icon: "⚒️", desc: "Buy a Forge upgrade.",                 cond: s => Object.keys(s.forge).length >= 1 },
+  { id: "lg1", name: "Will & Testament",       icon: "📜", desc: "Buy a Legacy Tree upgrade.",           cond: s => Object.keys(s.legacy).length >= 1 },
 ];
 
 // transcendence perks
@@ -1086,6 +1143,40 @@ const PERKS = [
   { req: 25, name: "Logan's Blessing", icon: "🙌", desc: "All production +25%." },
 ];
 function hasPerk(req) { return state.prestigeLevel >= req; }
+
+// The Forge — Rebirth Shard upgrades (tempo/automation layer)
+const FORGE = [
+  { id: "auto-builder",       name: "Auto-Builder",       icon: "🤖", base: 3,  r: 2.2, max: 5,  desc: "Auto-buys the cheapest affordable building. Each level doubles its speed (4s → 0.25s)." },
+  { id: "click-servo",        name: "Click Servo",        icon: "🦾", base: 5,  r: 2.5, max: 4,  desc: "Automatically clicks Logan once per second per level." },
+  { id: "warm-start",         name: "Warm Start",         icon: "🔥", base: 2,  r: 1.8, max: 10, desc: "Start each run with 1,000 Logans, ×4 per additional level." },
+  { id: "momentum",           name: "Momentum",           icon: "⚡", base: 8,  r: 3,   max: 3,  desc: "Keep 10% of your buildings per level when you Rebirth." },
+  { id: "upgrade-memory",     name: "Upgrade Memory",     icon: "🧠", base: 12, r: 2.5, max: 3,  desc: "Keep your 5 cheapest shop upgrades per level when you Rebirth." },
+  { id: "shard-resonance",    name: "Shard Resonance",    icon: "🔷", base: 6,  r: 1,   max: 1,  desc: "+5% production per unspent Shard (diminishing past 50)." },
+  { id: "golden-persistence", name: "Golden Persistence", icon: "✨", base: 10, r: 1,   max: 1,  desc: "Active buffs survive Rebirth." },
+];
+
+// Legacy Tree — Golden Glasses upgrades (meta layer)
+const LEGACY = [
+  { id: "deep-memory",      name: "Deep Memory",      icon: "🛌", base: 5,  r: 1.7, max: 3, desc: "Offline earnings cap +6 hours per level." },
+  { id: "born-evolved",     name: "Born Evolved",     icon: "👽", base: 8,  r: 1.7, max: 5, desc: "Start each run with 2 Alien Logans per level." },
+  { id: "tier-insight",     name: "Tier Insight",     icon: "🔬", base: 6,  r: 1.7, max: 5, desc: "Synthesis consumes 6% fewer lower-tier Logans per level." },
+  { id: "quick-molt",       name: "Quick Molt",       icon: "🦋", base: 15, r: 1.7, max: 5, desc: "+10% Rebirth Shard gain per level." },
+  { id: "world-attunement", name: "World Attunement", icon: "🌐", base: 10, r: 1.7, max: 5, desc: "Each open portal's production multiplier is +0.03 stronger per level." },
+  { id: "glass-forward",    name: "Glass Forward",    icon: "🚀", base: 12, r: 1.7, max: 5, desc: "Start each run with 1 of every discovered building per level." },
+  { id: "echo-industry",    name: "Echo of Industry", icon: "🏭", base: 30, r: 1,   max: 1, desc: "The Forge survives Transcendence." },
+];
+
+// Tier Ranks — every 10 of a tier grants a pick-one-of-two perk (respec on Rebirth)
+const RANK_PERKS = {
+  alien:  { a: { icon: "📈", name: "Alien Industry",  desc: "+15% production per rank" },
+            b: { icon: "✨", name: "Alien Charm",     desc: "Golden Logans 5% more frequent per rank" } },
+  super:  { a: { icon: "👆", name: "Super Strength",  desc: "+25% click power per rank" },
+            b: { icon: "🎯", name: "Super Precision", desc: "+3% crit chance per rank" } },
+  cosmic: { a: { icon: "⏳", name: "Cosmic Patience", desc: "Buffs last +15% per rank" },
+            b: { icon: "🔷", name: "Cosmic Insight",  desc: "+10% Rebirth Shards per rank" } },
+  god:    { a: { icon: "🧬", name: "Divine Economy",  desc: "Synthesis Logan-costs 10% cheaper per rank" },
+            b: { icon: "🍀", name: "Divine Fortune",  desc: "Lucky payouts +25% per rank" } },
+};
 
 // ============================================================
 // Data — flavor
@@ -1126,6 +1217,9 @@ const TICKER_LINES = [
   "Alien Logans demand equal clicking rights. Granted immediately.",
   "God Logan seen doing mortal things 'for fun.'",
   "Evolution scientists: 'It was Logans all the way up.'",
+  "Rebirth clinics report record turnout. Again. And again.",
+  "The Forge is hiring. Benefits include existing repeatedly.",
+  "Economists officially downgrade infinity to 'quite large.'",
 ];
 const SPEECH_LINES = [
   "Keep clicking, I believe in you!",
@@ -1150,6 +1244,8 @@ const SPEECH_LINES = [
   "Interdimensional me says hi.",
   "The alien me keeps abducting my snacks.",
   "God me still calls on weekends.",
+  "I remember all my past lives. Mostly clicking.",
+  "The Forge tickles. In a good way.",
 ];
 
 // ============================================================
@@ -1174,6 +1270,13 @@ let state = {
   skills: [],
   dimensions: [],
   currentDim: "earth",
+  shards: 0,
+  rebirths: 0,
+  forge: {},          // forge upgrade id -> level
+  legacy: {},         // legacy upgrade id -> level
+  glassSpent: 0,
+  ranks: { alien: [], super: [], cosmic: [], god: [] },  // chosen rank perks ("a"/"b")
+  founder: false,     // migration bonus for pre-v6 prestige stashes
   options: { sound: true, volume: 60 },
   savedAt: Date.now(),
 };
@@ -1184,13 +1287,33 @@ let bulkMode = "1";
 let currentScreen = "scene";
 
 let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1, offlineCapSec: 3600,
-          costMult: 1, wildFreq: 1, wildMult: 1, luckyMult: 1, frenzyPow: 7, stormPow: 77, achRate: 0.01, glassRate: 0.02,
-          tierCostMult: 1, tierBonusMult: 1, portalPow: 1.5, godExtra: 0 };
+          costMult: 1, wildFreq: 1, wildMult: 1, luckyMult: 1, frenzyPow: 7, stormPow: 77, achRate: 0.01, glassRate: 0.5,
+          tierCostMult: 1, tierBonusMult: 1, portalPow: 1.5, godExtra: 0, shardGainMult: 1, synthEff: 1 };
 
 // ============================================================
 // Helpers
 // ============================================================
 const $ = id => document.getElementById(id);
+
+// ============================================================
+// Balance constants & math helpers (v6 rebalance — see DESIGN.md)
+// ============================================================
+const BAL = {
+  shardOffset: 6, shardPow: 1.5,            // rebirth shards from run earnings
+  glassOffset: 6, glassPow: 2, glassDiv: 3, // golden glasses from lifetime earnings
+  permCap: 1e4, permPow: 0.5,               // softcap on the global permanent multiplier
+  clickCpsCap: 1000, clickCpsPow: 0.4,      // softcap on clicks-gain-CPS
+  stackCap: 25, stackPow: 0.6,              // diminishing returns on stacked same-source bonuses
+};
+function softcap(v, cap, p) { return v <= cap ? v : cap * Math.pow(v / cap, p); }
+function logGain(x, offset, pow, scale) {
+  const L = Math.log10(x + 1) - offset;
+  return L <= 0 ? 0 : Math.floor(Math.pow(L, pow) * (scale || 1));
+}
+function effStacks(n, cap) {
+  cap = cap || BAL.stackCap;
+  return n <= cap ? n : cap + Math.pow(n - cap, BAL.stackPow);
+}
 
 function fmt(n) {
   if (!isFinite(n)) return "∞";
@@ -1222,11 +1345,13 @@ function recalc() {
   M.frenzyPow = 7;
   M.stormPow = 77;
   M.achRate = 0.01;
-  M.glassRate = 0.02;
+  M.glassRate = 0.5;
   M.tierCostMult = 1;
   M.tierBonusMult = 1;
   M.portalPow = 1.5;
   M.godExtra = 0;
+  M.shardGainMult = 1;
+  M.synthEff = 1;
   let offMax = 3600, offPlus = 0, critPlus = 0, global = 1;
   owned.forEach(id => {
     const u = UPGRADE_BY_ID[id];
@@ -1266,13 +1391,31 @@ function recalc() {
     if (fx.portal) M.portalPow = Math.max(M.portalPow, fx.portal);
     if (fx.god) M.godExtra += fx.god;
   });
-  // logan tier bonuses
+  // the Forge (rebirth layer)
+  const F = id => state.forge[id] || 0;
+  const LG = id => state.legacy[id] || 0;
+  if (F("shard-resonance")) global *= 1 + 0.05 * effStacks(state.shards, 50);
+  // Legacy Tree (transcend layer)
+  offPlus += 6 * 3600 * LG("deep-memory");
+  M.synthEff *= Math.pow(0.94, LG("tier-insight"));
+  M.shardGainMult *= 1 + 0.10 * LG("quick-molt");
+  M.portalPow += 0.03 * LG("world-attunement");
+  // tier rank perks (choices past the current rank stay dormant)
+  LTIERS.forEach(t => {
+    state.ranks[t.id].slice(0, Math.floor(state.tiers[t.id] / 10)).forEach(c => {
+      if (t.id === "alien")       { if (c === "a") global *= 1.15;        else M.goldenFreq *= 0.95; }
+      else if (t.id === "super")  { if (c === "a") M.clickBase *= 1.25;   else M.critChance += 0.03; }
+      else if (t.id === "cosmic") { if (c === "a") M.goldenDur *= 1.15;   else M.shardGainMult *= 1.10; }
+      else if (t.id === "god")    { if (c === "a") M.tierCostMult *= 0.90; else M.luckyMult *= 1.25; }
+    });
+  });
+  // logan tier unit bonuses (diminishing past 25 per tier)
   const B = M.tierBonusMult;
-  global *= (1 + LTIER_BY_ID.alien.bonus * B * state.tiers.alien)
-          * (1 + LTIER_BY_ID.super.bonus * B * state.tiers.super)
-          * (1 + LTIER_BY_ID.cosmic.bonus * B * state.tiers.cosmic)
-          * (1 + (LTIER_BY_ID.god.bonus + M.godExtra) * B * state.tiers.god);
-  M.clickBase *= (1 + LTIER_BY_ID.super.clickBonus * B * state.tiers.super);
+  global *= (1 + LTIER_BY_ID.alien.bonus * B * effStacks(state.tiers.alien))
+          * (1 + LTIER_BY_ID.super.bonus * B * effStacks(state.tiers.super))
+          * (1 + LTIER_BY_ID.cosmic.bonus * B * effStacks(state.tiers.cosmic))
+          * (1 + (LTIER_BY_ID.god.bonus + M.godExtra) * B * effStacks(state.tiers.god));
+  M.clickBase *= (1 + LTIER_BY_ID.super.clickBonus * B * effStacks(state.tiers.super));
   // dimensions: passive per open portal + visit bonus
   global *= Math.pow(M.portalPow, state.dimensions.length);
   const here = state.currentDim;
@@ -1285,7 +1428,11 @@ function recalc() {
   if (hasPerk(5)) M.goldenFreq *= 0.85;
   M.critMult += critPlus;
   M.offlineCapSec = offMax + offPlus + (hasPerk(10) ? 7200 : 0);
-  M.cpsGlobal = global * (1 + M.achRate * unlockedAch.size) * (1 + M.glassRate * state.prestigeLevel) * (hasPerk(25) ? 1.25 : 1);
+  // permanent product, softcapped (the v6 anti-runaway core)
+  const achMult = 1 + M.achRate * effStacks(unlockedAch.size);
+  const glassMult = 1 + M.glassRate * Math.log10(1 + state.prestigeLevel);
+  const founderMult = state.founder ? 1.25 : 1;
+  M.cpsGlobal = softcap(global * achMult * glassMult * founderMult * (hasPerk(25) ? 1.25 : 1), BAL.permCap, BAL.permPow);
 }
 
 function loganLevel() { return state.everLogans >= 1e3 ? Math.floor(Math.log(state.everLogans / 1e3) / Math.log(3)) + 1 : 0; }
@@ -1303,7 +1450,9 @@ function cpsRaw() {
   return BUILDINGS.reduce((sum, b, i) => sum + b.rate * state.buildings[i] * M.bMult[i], 0) * M.cpsGlobal;
 }
 function cps() { return cpsRaw() * buffMult("cps"); }
-function clickPower() { return M.clickBase * buffMult("click") + cps() * M.clickCpsPct; }
+function clickPower() {
+  return M.clickBase * buffMult("click") + softcap(cps() * M.clickCpsPct, M.clickBase * BAL.clickCpsCap, BAL.clickCpsPow);
+}
 function totalBuildings() { return state.buildings.reduce((a, b) => a + b, 0); }
 function buildingCost(i, extra) {
   return Math.ceil(BUILDINGS[i].baseCost * Math.pow(G, state.buildings[i] + (extra || 0)) * M.costMult);
@@ -1331,8 +1480,13 @@ function earn(amount) {
   state.totalLogans += amount;
   state.everLogans += amount;
 }
-function prestigeLevelFor(ever) { return Math.floor(Math.cbrt(ever / 1e7)); }
+// v6: log-curve glasses — doubling glasses takes ×300+ lifetime income (see DESIGN.md §3)
+function prestigeLevelFor(ever) {
+  const L = Math.log10(ever + 1) - BAL.glassOffset;
+  return L <= 0 ? 0 : Math.floor(Math.pow(L, BAL.glassPow) / BAL.glassDiv);
+}
 function tierCost(t) { return Math.ceil(t.base * Math.pow(1.18, state.tiers[t.id]) * M.tierCostMult); }
+function tierConsume(t) { return t.reqTier ? Math.max(10, Math.ceil(25 * M.synthEff)) : 0; }
 function tierUnlocked(t) { return !t.reqTier || state.tiers[t.reqTier] >= t.reqCount; }
 
 // ============================================================
@@ -1436,6 +1590,7 @@ function showScreen(id) {
   tipEl.style.display = "none";
   if (id === "skills") updateSkillTree();
   else if (id === "worlds") updateWorldSelect();
+  else if (id === "prestige") updatePrestige();
   else if (id === "stats") { updateStats(); renderAwards(); }
 }
 document.querySelectorAll(".nav-btn").forEach(b => b.addEventListener("click", () => showScreen(b.dataset.screen)));
@@ -1451,6 +1606,9 @@ function updateHUD() {
   $("hud-click-val").textContent = fmt(clickPower());
   $("hud-sp-val").textContent = spAvail();
   $("hud-glass-val").textContent = state.prestigeLevel;
+  const sh = $("hud-shards");
+  sh.classList.toggle("on", state.shards > 0 || state.rebirths > 0 || pendingShards() > 0);
+  sh.querySelector(".c-val").textContent = fmt(state.shards);
   LTIERS.forEach(t => {
     const chip = $("hud-tier-" + t.id);
     chip.classList.toggle("on", state.tiers[t.id] > 0);
@@ -1675,6 +1833,7 @@ function initEvo() {
         '</div>' +
       '</div>' +
       '<div class="evo-heads"></div>' +
+      '<div class="rank-row"></div>' +
       '<div class="evo-req" style="display:none"><span class="evo-req-text"></span><span class="evo-req-bar"><span class="evo-req-fill"></span></span></div>' +
       '<button class="evo-buy"></button>';
     bindTip(card.querySelector(".evo-face"), () =>
@@ -1686,16 +1845,19 @@ function initEvo() {
 }
 function buyTier(t) {
   const cost = tierCost(t);
+  const consume = tierConsume(t);
   if (!tierUnlocked(t) || state.logans < cost) return;
+  if (consume && state.tiers[t.reqTier] < consume) return;
   state.logans -= cost;
+  if (consume) state.tiers[t.reqTier] -= consume;
   state.tiers[t.id]++;
   recalc();
   sfx("evolve");
   bump();
   flash(0.15);
   const n = state.tiers[t.id];
-  if (n === 1) toast("🧬 A " + t.name + " has evolved! " + t.icon, true);
-  else if (n === 10 || n === 25 || n === 50 || n === 100) toast("🧬 " + n + " " + t.name + "s! The " + t.name.toLowerCase() + " armada grows.", true);
+  if (n === 1) toast("🧬 A " + t.name + " has evolved!" + (consume ? " " + consume + " " + LTIER_BY_ID[t.reqTier].name + "s were absorbed." : ""), true);
+  else if (n === 10 || n === 25 || n === 50 || n === 100) toast("🧬 " + n + " " + t.name + "s! The armada grows.", true);
   updateEvo();
   updateArmy();
   updateHUD();
@@ -1712,7 +1874,7 @@ function updateEvo() {
     card.querySelector(".evo-bonus").textContent =
       "+" + totalPct.toFixed(totalPct % 1 ? 1 : 0) + "% production each" +
       (t.clickBonus ? ", +" + (t.clickBonus * M.tierBonusMult * 100).toFixed(0) + "% click" : "") +
-      (n ? " — total +" + fmt(totalPct * n) + "%" : "");
+      (n ? " — total +" + fmt(totalPct * effStacks(n)) + "%" : "");
     // heads (up to 8 minis)
     const heads = card.querySelector(".evo-heads");
     const want = Math.min(n, 8);
@@ -1737,10 +1899,55 @@ function updateEvo() {
       buy.style.display = "";
       req.style.display = "none";
       const cost = tierCost(t);
-      buy.textContent = "Evolve — " + fmt(cost) + " 🪙";
-      buy.disabled = state.logans < cost;
+      const consume = tierConsume(t);
+      buy.textContent = "Evolve — " + (consume ? consume + " " + LTIER_BY_ID[t.reqTier].icon + " + " : "") + fmt(cost) + " 🪙";
+      buy.disabled = state.logans < cost || (consume > 0 && state.tiers[t.reqTier] < consume);
     }
+    updateRankRow(card, t);
   });
+}
+
+// pick-one-of-two rank perks; rebuilt only when rank/choices change
+function updateRankRow(card, t) {
+  const row = card.querySelector(".rank-row");
+  const rank = Math.floor(state.tiers[t.id] / 10);
+  const chosen = state.ranks[t.id];
+  const sig = rank + ":" + chosen.join("");
+  if (row.dataset.sig === sig) return;
+  row.dataset.sig = sig;
+  row.innerHTML = "";
+  if (!rank && !chosen.length) return;
+  const lbl = document.createElement("span");
+  lbl.className = "rank-label";
+  lbl.textContent = "Ranks:";
+  row.appendChild(lbl);
+  chosen.forEach((c, i) => {
+    const p = RANK_PERKS[t.id][c];
+    const b = document.createElement("span");
+    b.className = "rank-badge" + (i >= rank ? " dormant" : "");
+    b.textContent = p.icon;
+    bindTip(b, '<div class="tt-name">' + p.icon + " " + p.name + '</div><div class="tt-desc">' + p.desc + (i >= rank ? " — dormant: tier count dropped below rank." : "") + '</div>');
+    row.appendChild(b);
+  });
+  if (chosen.length < rank) {
+    ["a", "b"].forEach(k => {
+      const p = RANK_PERKS[t.id][k];
+      const btn = document.createElement("button");
+      btn.className = "rank-pick";
+      btn.textContent = p.icon + "?";
+      bindTip(btn, '<div class="tt-name">' + p.icon + " " + p.name + '</div><div class="tt-desc">' + p.desc + '</div><div class="tt-line" style="color:var(--gold)">Rank ' + (chosen.length + 1) + ' perk — pick one of two. Respec on Rebirth.</div>');
+      btn.addEventListener("click", () => {
+        if (state.ranks[t.id].length >= Math.floor(state.tiers[t.id] / 10)) return;
+        state.ranks[t.id].push(k);
+        recalc();
+        sfx("skill");
+        toast("🎖️ Rank perk chosen: " + p.icon + " " + p.name + "!");
+        updateEvo();
+        updateHUD();
+      });
+      row.appendChild(btn);
+    });
+  }
 }
 
 // ============================================================
@@ -2149,6 +2356,146 @@ function updateSkillTree() {
 }
 
 // ============================================================
+// Prestige screen — Rebirth / Forge / Legacy Tree
+// ============================================================
+function glassAvail() { return state.prestigeLevel - state.glassSpent; }
+function pendingShards() { return Math.floor(logGain(state.totalLogans, BAL.shardOffset, BAL.shardPow) * M.shardGainMult); }
+function metaCost(def, lvl) { return Math.ceil(def.base * Math.pow(def.r, lvl)); }
+
+// head-start bonuses applied after any reset (Forge + Legacy)
+function applyStartingBonuses() {
+  const ws = state.forge["warm-start"] || 0;
+  if (ws) state.logans += 1000 * Math.pow(4, ws - 1);
+  const gf = state.legacy["glass-forward"] || 0;
+  if (gf) BUILDINGS.forEach((b, i) => { if (state.everLogans >= b.baseCost / 4) state.buildings[i] += gf; });
+  const be = state.legacy["born-evolved"] || 0;
+  if (be) state.tiers.alien = Math.max(state.tiers.alien, 2 * be);
+  recalc();
+}
+
+function doRebirth() {
+  const gain = pendingShards();
+  if (gain <= 0) return;
+  state.shards += gain;
+  state.rebirths++;
+  const keep = 0.10 * (state.forge["momentum"] || 0);
+  state.buildings = state.buildings.map(n => Math.floor(n * keep));
+  // dimensional upgrades always survive; Upgrade Memory keeps the cheapest others
+  const keepN = 5 * (state.forge["upgrade-memory"] || 0);
+  const dims = [...owned].filter(id => UPGRADE_BY_ID[id] && UPGRADE_BY_ID[id].dim);
+  const others = [...owned].filter(id => UPGRADE_BY_ID[id] && !UPGRADE_BY_ID[id].dim)
+    .sort((a, b) => UPGRADE_BY_ID[a].cost - UPGRADE_BY_ID[b].cost).slice(0, keepN);
+  owned = new Set([...dims, ...others]);
+  if (!state.forge["golden-persistence"]) buffs = {};
+  state.ranks = { alien: [], super: [], cosmic: [], god: [] };   // free respec
+  state.logans = 0;
+  state.totalLogans = 0;
+  state.runTime = 0;
+  combo = 0;
+  recalc();
+  applyStartingBonuses();
+  dispBank = state.logans;
+  sfx("portal");
+  flash(0.4);
+  bump();
+  toast("🔷 Rebirth! +" + fmt(gain) + " Shards banked. Round " + (state.rebirths + 1) + " begins.", true);
+  upgKey = "";
+  updateShop(); updateHUD(); updateEvo(); updateArmy(); updatePrestige(); updateCombo();
+  save();
+}
+$("rebirth-btn").addEventListener("click", doRebirth);
+
+const forgeEls = {}, legacyEls = {};
+function renderMetaList(defs, container, els, buyFn) {
+  defs.forEach(def => {
+    const btn = document.createElement("button");
+    btn.className = "shop-item meta-item";
+    btn.innerHTML =
+      '<span class="icon">' + def.icon + '</span>' +
+      '<span class="info"><span class="name">' + def.name + '</span>' +
+      '<span class="rate-line" style="display:block">' + def.desc + '</span>' +
+      '<span class="cost" style="display:block"></span></span>' +
+      '<span class="lvl"></span>';
+    btn.addEventListener("click", () => buyFn(def));
+    container.appendChild(btn);
+    els[def.id] = btn;
+  });
+}
+function renderPrestigeShops() {
+  renderMetaList(FORGE, $("forge-list"), forgeEls, buyForge);
+  renderMetaList(LEGACY, $("legacy-list"), legacyEls, buyLegacy);
+}
+function buyForge(def) {
+  const lvl = state.forge[def.id] || 0;
+  const cost = metaCost(def, lvl);
+  if (lvl >= def.max || state.shards < cost) return;
+  state.shards -= cost;
+  state.forge[def.id] = lvl + 1;
+  recalc(); sfx("skill"); bump();
+  toast("⚒️ Forged: " + def.icon + " " + def.name + " Lv " + (lvl + 1) + "!");
+  updatePrestige(); updateHUD();
+}
+function buyLegacy(def) {
+  const lvl = state.legacy[def.id] || 0;
+  const cost = metaCost(def, lvl);
+  if (lvl >= def.max || glassAvail() < cost) return;
+  state.glassSpent += cost;
+  state.legacy[def.id] = lvl + 1;
+  recalc(); sfx("skill"); bump();
+  toast("📜 Legacy secured: " + def.icon + " " + def.name + " Lv " + (lvl + 1) + "!");
+  updatePrestige(); updateHUD();
+}
+function updateMetaShop(defs, els, store, balance, cur) {
+  defs.forEach(def => {
+    const btn = els[def.id];
+    const lvl = store[def.id] || 0;
+    const maxed = lvl >= def.max;
+    const cost = metaCost(def, lvl);
+    const costEl = btn.querySelector(".cost");
+    costEl.textContent = maxed ? "Complete" : fmt(cost) + " " + cur;
+    costEl.classList.toggle("affordable", !maxed && balance >= cost);
+    const lv = btn.querySelector(".lvl");
+    lv.textContent = "Lv " + lvl + "/" + def.max;
+    lv.classList.toggle("maxed", maxed);
+    btn.disabled = maxed || balance < cost;
+  });
+}
+
+function updatePrestige() {
+  if (currentScreen !== "prestige") return;
+  const pend = pendingShards();
+  const nextL = Math.pow((pend + 1) / Math.max(M.shardGainMult, 0.01), 1 / BAL.shardPow) + BAL.shardOffset;
+  $("rebirth-lines").innerHTML =
+    statLine("Shards held", "🔷 " + fmt(state.shards), true) +
+    statLine("Rebirth now for", "+" + fmt(pend) + " 🔷") +
+    statLine("Next Shard at", "~" + fmt(Math.pow(10, nextL)) + " run earnings") +
+    statLine("This run earned", fmt(Math.floor(state.totalLogans))) +
+    statLine("Rebirths", state.rebirths);
+  const rb = $("rebirth-btn");
+  rb.disabled = pend <= 0;
+  rb.textContent = pend > 0 ? "🔷 Rebirth (+" + fmt(pend) + " Shards)" : "🔷 Rebirth (reach 10M run earnings)";
+  updateMetaShop(FORGE, forgeEls, state.forge, state.shards, "🔷");
+
+  const lvl = prestigeLevelFor(state.everLogans);
+  const gain = Math.max(0, lvl - state.prestigeLevel);
+  const nextGlassAt = Math.pow(10, BAL.glassOffset + Math.sqrt((state.prestigeLevel + gain + 1) * BAL.glassDiv));
+  $("prestige-lines").innerHTML =
+    statLine("Golden Glasses", "👓 " + state.prestigeLevel + " (" + glassAvail() + " unspent)", true) +
+    statLine("Passive bonus", "×" + (1 + M.glassRate * Math.log10(1 + state.prestigeLevel)).toFixed(2), true) +
+    statLine("Transcend now for", "+" + gain + " 👓") +
+    statLine("Next glass at", "~" + fmt(nextGlassAt) + " all-time") +
+    (state.founder ? statLine("🏺 Founder's Bonus", "+25% production", true) : "");
+  $("perk-list").innerHTML = PERKS.map(p =>
+    '<div class="perk-line' + (hasPerk(p.req) ? "" : " locked") + '">' +
+    '<span>' + p.icon + '</span><span class="p-name">' + p.name + '</span>' +
+    '<span class="p-desc">' + (hasPerk(p.req) ? p.desc : "Unlocks at " + p.req + " 👓 — " + p.desc) + '</span></div>').join("");
+  const btn = $("ascend-btn");
+  btn.disabled = gain <= 0;
+  btn.textContent = gain > 0 ? "🦋 Transcend (+" + gain + " Golden Glasses)" : "🦋 Transcend (earn more first)";
+  updateMetaShop(LEGACY, legacyEls, state.legacy, glassAvail(), "👓");
+}
+
+// ============================================================
 // Stats screen
 // ============================================================
 function statLine(k, v, gold) {
@@ -2174,7 +2521,10 @@ function updateStats() {
     statLine("Logan Level", loganLevel(), true) +
     statLine("Skill points", spAvail() + " available / " + spTotal() + " total") +
     statLine("Worlds unlocked", state.dimensions.length + " / " + (DIMENSIONS.length - 1)) +
+    statLine("Rebirths", state.rebirths) +
+    statLine("Shards held", "🔷 " + fmt(state.shards)) +
     statLine("Transcensions", state.ascensions) +
+    (state.founder ? statLine("🏺 Founder's Bonus", "+25% production", true) : "") +
     statLine("Time played", fmtTime(state.playTime));
   $("stats-records").innerHTML =
     statLine("Biggest click", fmt(state.records.biggestClick), true) +
@@ -2188,28 +2538,12 @@ function updateStats() {
     bd += statLine(b.icon + " " + b.name + " ×" + state.buildings[i], fmt(b.rate * state.buildings[i] * M.bMult[i] * M.cpsGlobal) + "/s");
   });
   $("building-breakdown").innerHTML = bd || '<div class="stat-line"><span class="k">Nothing yet — buy a building!</span></div>';
-
-  const lvl = prestigeLevelFor(state.everLogans);
-  const gain = Math.max(0, lvl - state.prestigeLevel);
-  const nextAt = 1e7 * Math.pow(lvl + 1, 3);
-  $("prestige-lines").innerHTML =
-    statLine("Golden Glasses", "👓 " + state.prestigeLevel, true) +
-    statLine("CPS bonus", "+" + (state.prestigeLevel * M.glassRate * 100).toFixed(0) + "%", true) +
-    statLine("Transcend now for", "+" + gain + " 👓") +
-    statLine("Next glass at", fmt(nextAt) + " all-time");
-  $("perk-list").innerHTML = PERKS.map(p =>
-    '<div class="perk-line' + (hasPerk(p.req) ? "" : " locked") + '">' +
-    '<span>' + p.icon + '</span><span class="p-name">' + p.name + '</span>' +
-    '<span class="p-desc">' + (hasPerk(p.req) ? p.desc : "Unlocks at " + p.req + " 👓 — " + p.desc) + '</span></div>').join("");
-  const btn = $("ascend-btn");
-  btn.disabled = gain <= 0;
-  btn.textContent = gain > 0 ? "🦋 Transcend (+" + gain + " Golden Glasses)" : "🦋 Transcend (earn more first)";
 }
 $("ascend-btn").addEventListener("click", () => {
   const lvl = prestigeLevelFor(state.everLogans);
   const gain = lvl - state.prestigeLevel;
   if (gain <= 0) return;
-  if (!confirm("Transcend now?\n\nYou will gain " + gain + " Golden Glasses (+" + gain * 2 + "% CPS forever), but your Logans, buildings, evolved Logans, and shop upgrades will reset.\n\nAchievements, lifetime stats, glasses, skills, open portals, and dimensional upgrades are all kept.")) return;
+  if (!confirm("Transcend now?\n\nYou will gain " + gain + " Golden Glasses to spend in the Legacy Tree, but your Logans, buildings, evolved Logans, shop upgrades, Shards, and the Forge" + (state.legacy["echo-industry"] ? " (kept — Echo of Industry)" : "") + " will reset.\n\nAchievements, lifetime stats, glasses, the Legacy Tree, skills, open portals, and dimensional upgrades are all kept.")) return;
   state.prestigeLevel = lvl;
   state.ascensions++;
   state.logans = 0;
@@ -2217,19 +2551,25 @@ $("ascend-btn").addEventListener("click", () => {
   state.runTime = 0;
   state.buildings = BUILDINGS.map(() => 0);
   state.tiers = { alien: 0, super: 0, cosmic: 0, god: 0 };
+  state.ranks = { alien: [], super: [], cosmic: [], god: [] };
+  state.shards = 0;
+  if (!state.legacy["echo-industry"]) state.forge = {};
   owned = new Set([...owned].filter(id => UPGRADE_BY_ID[id] && UPGRADE_BY_ID[id].dim));
   buffs = {};
   recalc();
   if (hasPerk(1)) state.logans = 200 * state.prestigeLevel;
+  applyStartingBonuses();
   dispBank = state.logans;
   sfx("ascend");
   flash(0.9);
-  toast("🦋 Transcended! You now own " + state.prestigeLevel + " Golden Glasses.", true);
+  toast("🦋 Transcended! You now own " + state.prestigeLevel + " Golden Glasses. Spend them in the Legacy Tree.", true);
+  upgKey = "";
   updateShop();
   updateHUD();
   updateStats();
   updateArmy();
   updateEvo();
+  updatePrestige();
   save();
 });
 
@@ -2349,11 +2689,18 @@ $("opt-wipe").addEventListener("click", () => {
 // ============================================================
 function serialize() {
   return {
-    version: 5,
+    version: 6,
     skills: state.skills,
     dimensions: state.dimensions,
     currentDim: state.currentDim,
     tiers: state.tiers,
+    shards: state.shards,
+    rebirths: state.rebirths,
+    forge: state.forge,
+    legacy: state.legacy,
+    glassSpent: state.glassSpent,
+    ranks: state.ranks,
+    founder: state.founder,
     logans: state.logans,
     totalLogans: state.totalLogans,
     everLogans: state.everLogans,
@@ -2397,6 +2744,20 @@ function load() {
       state.records.bestCombo = s.records.bestCombo || 0;
     }
     if (s.tiers) LTIERS.forEach(t => state.tiers[t.id] = s.tiers[t.id] || 0);
+    state.shards = s.shards || 0;
+    state.rebirths = s.rebirths || 0;
+    if (s.forge && typeof s.forge === "object") state.forge = s.forge;
+    if (s.legacy && typeof s.legacy === "object") state.legacy = s.legacy;
+    state.glassSpent = s.glassSpent || 0;
+    state.founder = !!s.founder;
+    if (s.ranks) LTIERS.forEach(t => { if (Array.isArray(s.ranks[t.id])) state.ranks[t.id] = s.ranks[t.id].filter(c => c === "a" || c === "b"); });
+    // v5→v6 migration: glasses move to the log curve; oversized old stashes grant the Founder's Bonus
+    if ((s.version || 1) < 6) {
+      const nl = prestigeLevelFor(state.everLogans);
+      if (state.prestigeLevel > nl) state.founder = true;
+      state.prestigeLevel = Math.min(state.prestigeLevel, nl);
+      state.glassSpent = Math.min(state.glassSpent, state.prestigeLevel);
+    }
     if (s.options && typeof s.options.sound === "boolean") state.options.sound = s.options.sound;
     if (s.options && typeof s.options.volume === "number") state.options.volume = s.options.volume;
     if (Array.isArray(s.skills)) state.skills = s.skills.filter(id => SKILL_BY_ID[id]);
@@ -2441,8 +2802,40 @@ function accrue() {
   const rate = cps();
   if (rate > 0) earn(rate * dt);
 }
+// Forge automation — runs even while the tab is hidden
+let autoTimer = 0;
+function runAutomation() {
+  const ab = state.forge["auto-builder"] || 0;
+  if (ab) {
+    autoTimer += 1;
+    const iv = [4, 2, 1, 0.5, 0.25][ab - 1];
+    let bought = false;
+    while (autoTimer >= iv) {
+      autoTimer -= iv;
+      let best = -1, bc = Infinity;
+      BUILDINGS.forEach((b, i) => {
+        if (!buildingDiscovered(i)) return;
+        const c = buildingCost(i);
+        if (c <= state.logans && c < bc) { bc = c; best = i; }
+      });
+      if (best < 0) { autoTimer = 0; break; }
+      state.logans -= bc;
+      state.buildings[best]++;
+      bought = true;
+    }
+    if (bought && !document.hidden) { updateShop(); updateArmy(); }
+  }
+  const servo = state.forge["click-servo"] || 0;
+  if (servo) {
+    let g = clickPower() * servo;
+    if (M.critChance > 0 && Math.random() < M.critChance) g *= M.critMult;
+    earn(g);
+    state.totalClicks += servo;
+  }
+}
 setInterval(() => {
   accrue();
+  runAutomation();
   const c = cps();
   if (c > state.records.bestCps) state.records.bestCps = c;
   if (document.hidden) { dispBank = state.logans; return; }
@@ -2463,7 +2856,7 @@ function tick() {
   updateBuffs();
   requestAnimationFrame(tick);
 }
-setInterval(() => { updateShop(); updateWorldSelect(); updateSkillTree(); }, 250);
+setInterval(() => { updateShop(); updateWorldSelect(); updateSkillTree(); updatePrestige(); }, 250);
 setInterval(updateStats, 500);
 setInterval(checkAchievements, 1000);
 setInterval(nextTicker, 9000);
@@ -2480,6 +2873,7 @@ recalc();
 applyWorldTheme();
 renderWorldSelect();
 renderSkillTree();
+renderPrestigeShops();
 $("opt-volume").value = state.options.volume;
 updateSoundBtn();
 updateRing();
