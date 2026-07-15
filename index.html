@@ -440,6 +440,71 @@
     cursor: pointer;
   }
 
+  /* combo meter */
+  #combo-row { margin-top: .4rem; height: 1.3rem; font-size: .85rem; font-weight: 800; color: var(--crit); display: flex; align-items: center; gap: .5rem; opacity: 0; transition: opacity .2s; }
+  #combo-row.show { opacity: 1; }
+  #combo-bar { display: inline-block; width: 90px; height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; }
+  #combo-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--crit)); width: 0%; }
+
+  /* achievement progress ring around Logan */
+  #ach-ring {
+    position: absolute; inset: -13px; border-radius: 50%; pointer-events: none; z-index: 0; opacity: .85;
+    -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+    mask-image: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  }
+
+  /* speech bubble */
+  #speech {
+    position: absolute; top: -26px; left: 66%; z-index: 25;
+    background: #fdf6e3; color: #333;
+    border-radius: 14px; padding: .5rem .8rem;
+    font-size: .82rem; font-weight: 600; max-width: 200px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    opacity: 0; transform: scale(.6); transform-origin: bottom left;
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+  }
+  #speech.show { opacity: 1; transform: scale(1); }
+  #speech::after { content: ""; position: absolute; bottom: -8px; left: 18px; border: 9px solid transparent; border-top-color: #fdf6e3; border-bottom: none; }
+
+  /* wild logan */
+  #wild {
+    position: fixed; width: 74px; height: 74px; border-radius: 50%;
+    border: 3px solid #7ce27c;
+    cursor: pointer; z-index: 50; display: none; object-fit: cover;
+    filter: hue-rotate(70deg) saturate(1.8) brightness(1.05);
+    box-shadow: 0 0 24px 6px rgba(110,220,110,.7);
+    animation: gallop .3s linear infinite;
+  }
+  @keyframes gallop { 0%,100% { rotate: -7deg; } 50% { rotate: 7deg; } }
+
+  /* juice */
+  @keyframes shake { 0%,100% { translate: 0 0; } 25% { translate: 5px -3px; } 50% { translate: -4px 3px; } 75% { translate: 3px 2px; } }
+  #logan-wrap.shake { animation: shake .22s; }
+  @keyframes popCounter { 50% { transform: scale(1.08); } }
+  #counter.pop { animation: popCounter .18s; }
+
+  /* building tier progress */
+  .tier-bar { display: block; height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; margin-top: .3rem; overflow: hidden; }
+  .tier-fill { display: block; height: 100%; background: var(--gold-dim); width: 0%; }
+
+  /* transcendence perks */
+  .perk-line { display: flex; gap: .5rem; align-items: baseline; font-size: .8rem; padding: .2rem 0; }
+  .perk-line.locked { opacity: .38; }
+  .perk-line .p-name { font-weight: 700; white-space: nowrap; }
+  .perk-line .p-desc { color: var(--muted); font-size: .72rem; }
+
+  /* volume */
+  #vol-row { display: flex; align-items: center; gap: .7rem; background: var(--card); border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: .6rem .9rem; margin-bottom: .5rem; font-size: .88rem; font-weight: 600; }
+  #opt-volume { flex: 1; accent-color: var(--gold); }
+
+  /* vignette over play area */
+  #main::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 45%, transparent 55%, rgba(0,0,0,.3));
+    z-index: 2;
+  }
+
   @media (max-width: 760px) {
     #game { flex-direction: column; }
     #main { flex: none; padding: 3rem 0 1.2rem; }
@@ -458,9 +523,12 @@
     <div id="buff-row"></div>
     <div id="logan-wrap">
       <div id="sunburst"></div>
+      <div id="ach-ring"></div>
       <img id="logan" src="Logan.png" alt="Logan — click him!" draggable="false">
+      <div id="speech"></div>
     </div>
     <div id="click-power-label">+1 per click</div>
+    <div id="combo-row"><span id="combo-text"></span><span id="combo-bar"><span id="combo-fill"></span></span></div>
     <div id="stats-row">
       <span id="stat-clicks">Clicks: 0</span>
       <span id="stat-total">All-time: 0</span>
@@ -497,9 +565,13 @@
       <div class="stat-block" id="stats-life"></div>
       <div class="section-label">Production breakdown</div>
       <div class="stat-block" id="building-breakdown"></div>
+      <div class="section-label">Records</div>
+      <div class="stat-block" id="stats-records"></div>
       <div class="section-label">Transcendence</div>
       <div class="stat-block" id="prestige-block">
         <div id="prestige-lines"></div>
+        <div class="section-label" style="margin:.6rem 0 .2rem">Perks</div>
+        <div id="perk-list"></div>
         <button id="ascend-btn">Transcend</button>
       </div>
     </div>
@@ -512,15 +584,17 @@
     <div id="tab-options" class="tab-page hidden">
       <div class="section-label">Options</div>
       <button class="opt-btn" id="opt-sound">🔊 Sound: On</button>
+      <div id="vol-row"><span>🎚️ Volume</span><input type="range" id="opt-volume" min="0" max="100" value="60"></div>
       <button class="opt-btn" id="opt-export">📤 Export save</button>
       <button class="opt-btn" id="opt-import">📥 Import save</button>
       <button class="opt-btn danger" id="opt-wipe">🗑️ Wipe save</button>
-      <div class="opt-note">Your game autosaves every 10 seconds and when you close the tab. Offline earnings are collected for up to 1 hour away.<br><br>Made with 💛 for Logan.</div>
+      <div class="opt-note">Your game autosaves every 10 seconds and when you close the tab. Offline earnings are collected for up to 1 hour away — longer with certain upgrades and perks.<br><br>Made with 💛 for Logan.</div>
     </div>
   </div>
 </div>
 
 <img id="golden" src="Logan.png" alt="Golden Logan!" draggable="false">
+<img id="wild" src="Logan.png" alt="A wild Logan!" draggable="false">
 <div id="flash"></div>
 <div id="toast"></div>
 <div id="tooltip"></div>
@@ -557,6 +631,9 @@ const BUILDINGS = [
   { name: "Logan Condenser",     icon: "⚗️", desc: "Condenses pure Logan essence out of thin air.",         baseCost: 7.5e10, rate: 1.6e6 },
   { name: "Logan Prism",         icon: "🔷", desc: "Refracts ordinary light into a rainbow of Logans.",     baseCost: 1e12,   rate: 1e7 },
   { name: "The Loganverse",      icon: "🌌", desc: "An entire universe where everything is Logan.",         baseCost: 1.4e13, rate: 6.5e7 },
+  { name: "Logan AI",            icon: "🤖", desc: "Trained exclusively on pictures of Logan.",             baseCost: 1.7e14, rate: 4.3e8 },
+  { name: "Logan Deity",         icon: "🛐", desc: "Prayers per second, answered in Logans.",               baseCost: 2.1e15, rate: 2.9e9 },
+  { name: "Logan Singularity",   icon: "♾️", desc: "All possible Logans, converging into one point.",       baseCost: 2.6e16, rate: 2.1e10 },
 ];
 
 // legacy v1 upgrade order — index in old save's boolean array maps to these ids
@@ -574,31 +651,45 @@ defUpgrade({ id: "diamond-finger",  name: "Diamond Finger",     icon: "💎", co
 defUpgrade({ id: "logan-touch",     name: "The Logan Touch",    icon: "🌟", cost: 1e7,   kind: "click", mult: 5, desc: "Clicks are 5x as powerful." });
 defUpgrade({ id: "titanium-finger", name: "Titanium Finger",    icon: "🦾", cost: 1e9,   kind: "click", mult: 5, desc: "Clicks are 5x as powerful." });
 defUpgrade({ id: "cosmic-poke",     name: "Cosmic Poke",        icon: "☄️", cost: 1e11,  kind: "click", mult: 7, desc: "Clicks are 7x as powerful." });
+defUpgrade({ id: "galactic-high-five", name: "Galactic High-Five", icon: "🪐", cost: 1e13, kind: "click", mult: 7,  desc: "Clicks are 7x as powerful." });
+defUpgrade({ id: "omni-poke",       name: "Omni-Poke",          icon: "🔮", cost: 1e15,  kind: "click", mult: 10, desc: "Clicks are 10x as powerful. You poke every Logan at once." });
 
 // critical clicks
-defUpgrade({ id: "lucky-thumb",  name: "Lucky Thumb",  icon: "🍀", cost: 250e3, kind: "crit", chance: 0.05, mult: 10, desc: "5% chance for clicks to CRIT for 10x." });
-defUpgrade({ id: "golden-thumb", name: "Golden Thumb", icon: "👍", cost: 1e8,   kind: "crit", chance: 0.05, mult: 15, desc: "+5% crit chance, and crits hit for 15x." });
+defUpgrade({ id: "lucky-thumb",   name: "Lucky Thumb",   icon: "🍀", cost: 250e3, kind: "crit", chance: 0.05, mult: 10, desc: "5% chance for clicks to CRIT for 10x." });
+defUpgrade({ id: "golden-thumb",  name: "Golden Thumb",  icon: "👍", cost: 1e8,   kind: "crit", chance: 0.05, mult: 15, desc: "+5% crit chance, and crits hit for 15x." });
+defUpgrade({ id: "diamond-thumb", name: "Diamond Thumb", icon: "💠", cost: 1e11,  kind: "crit", chance: 0.05, mult: 20, desc: "+5% crit chance, and crits hit for 20x." });
 
 // clicks gain % of CPS
-defUpgrade({ id: "helping-hand", name: "Helping Hand", icon: "🖐️", cost: 5e5, kind: "clickCps", pct: 0.01, desc: "Clicks also gain +1% of your Logans per second." });
-defUpgrade({ id: "team-logan",   name: "Team Logan",   icon: "👥", cost: 5e7, kind: "clickCps", pct: 0.04, desc: "Clicks also gain +4% of your Logans per second." });
-defUpgrade({ id: "logan-army",   name: "Logan Army",   icon: "🎖️", cost: 5e9, kind: "clickCps", pct: 0.05, desc: "Clicks also gain +5% of your Logans per second." });
+defUpgrade({ id: "helping-hand", name: "Helping Hand", icon: "🖐️", cost: 5e5,  kind: "clickCps", pct: 0.01, desc: "Clicks also gain +1% of your Logans per second." });
+defUpgrade({ id: "team-logan",   name: "Team Logan",   icon: "👥", cost: 5e7,  kind: "clickCps", pct: 0.04, desc: "Clicks also gain +4% of your Logans per second." });
+defUpgrade({ id: "logan-army",   name: "Logan Army",   icon: "🎖️", cost: 5e9,  kind: "clickCps", pct: 0.05, desc: "Clicks also gain +5% of your Logans per second." });
+defUpgrade({ id: "logan-legion", name: "Logan Legion", icon: "⚔️", cost: 5e11, kind: "clickCps", pct: 0.10, desc: "Clicks also gain +10% of your Logans per second." });
 
 // pets — global CPS multipliers
 defUpgrade({ id: "pet-hamster", name: "Logan's Hamster", icon: "🐹", cost: 1e6,  kind: "cpsMult", mult: 1.10, desc: "Runs on a wheel. All production +10%." });
 defUpgrade({ id: "pet-cat",     name: "Logan's Cat",     icon: "🐱", cost: 1e8,  kind: "cpsMult", mult: 1.10, desc: "Supervises everything. All production +10%." });
 defUpgrade({ id: "pet-dog",     name: "Logan's Dog",     icon: "🐶", cost: 1e10, kind: "cpsMult", mult: 1.15, desc: "A very good boy. All production +15%." });
 defUpgrade({ id: "pet-dragon",  name: "Logan's Dragon",  icon: "🐉", cost: 1e12, kind: "cpsMult", mult: 1.20, desc: "Do not ask where he got it. All production +20%." });
+defUpgrade({ id: "pet-unicorn", name: "Logan's Unicorn", icon: "🦄", cost: 1e14, kind: "cpsMult", mult: 1.25, desc: "Denies existing. All production +25%." });
+defUpgrade({ id: "pet-whale",   name: "Logan's Whale",   icon: "🐋", cost: 1e16, kind: "cpsMult", mult: 1.30, desc: "Lives in the bathtub. All production +30%." });
 
 // golden Logan improvements
-defUpgrade({ id: "logan-magnet", name: "Logan Magnet", icon: "🧲", cost: 5e6, kind: "goldenFreq", mult: 0.7,  desc: "Golden Logans appear 30% more often." });
-defUpgrade({ id: "lucky-aura",   name: "Lucky Aura",   icon: "😇", cost: 5e8, kind: "goldenDur",  mult: 1.3,  desc: "Golden Logan effects last 30% longer." });
+defUpgrade({ id: "logan-magnet",      name: "Logan Magnet",      icon: "🧲", cost: 5e6,  kind: "goldenFreq", mult: 0.7,  desc: "Golden Logans appear 30% more often." });
+defUpgrade({ id: "lucky-aura",        name: "Lucky Aura",        icon: "😇", cost: 5e8,  kind: "goldenDur",  mult: 1.3,  desc: "Golden Logan effects last 30% longer." });
+defUpgrade({ id: "logan-hypermagnet", name: "Logan Hypermagnet", icon: "🛎️", cost: 5e10, kind: "goldenFreq", mult: 0.75, desc: "Golden Logans appear 25% more often, again." });
+defUpgrade({ id: "blessed-aura",      name: "Blessed Aura",      icon: "🌠", cost: 5e12, kind: "goldenDur",  mult: 1.25, desc: "Golden Logan effects last 25% longer, again." });
+
+// offline earnings
+defUpgrade({ id: "logan-daydream",   name: "Logan Daydream",  icon: "💤", cost: 1e7,  kind: "offline", capH: 4,  desc: "Offline earnings accumulate for up to 4 hours." });
+defUpgrade({ id: "logan-deep-dream", name: "Deep Logan Dream", icon: "🌙", cost: 1e10, kind: "offline", capH: 12, desc: "Offline earnings accumulate for up to 12 hours." });
 
 // building tier upgrades
 const TIERS = [
-  { req: 1,  costMult: 10,  adj: "Improved" },
-  { req: 10, costMult: 60,  adj: "Turbocharged" },
-  { req: 30, costMult: 600, adj: "Quantum" },
+  { req: 1,   costMult: 10,    adj: "Improved" },
+  { req: 10,  costMult: 60,    adj: "Turbocharged" },
+  { req: 30,  costMult: 600,   adj: "Quantum" },
+  { req: 60,  costMult: 6000,  adj: "Celestial" },
+  { req: 120, costMult: 60000, adj: "Transcendent" },
 ];
 BUILDINGS.forEach((b, i) => {
   const shortName = b.name.replace(/^The /, "");
@@ -656,6 +747,47 @@ const ACHIEVEMENTS = [
   { id: "u2", name: "Optimizer",               icon: "⚙️", desc: "Purchase 20 upgrades.",                cond: () => owned.size >= 20 },
   { id: "u3", name: "Maxed Out",               icon: "🧠", desc: "Purchase 40 upgrades.",                cond: () => owned.size >= 40 },
   { id: "t1", name: "Veteran Clicker",         icon: "⌛", desc: "Play for a total of 1 hour.",          cond: s => s.playTime >= 3600 },
+  { id: "c6", name: "Million Click March",     icon: "⚡", desc: "Click Logan 1,000,000 times.",         cond: s => s.totalClicks >= 1e6 },
+  { id: "e8", name: "Logan Eternal",           icon: "♾️", desc: "Earn 10 quadrillion Logans in total.", cond: s => s.everLogans >= 1e16 },
+  { id: "p6", name: "Logan Hypernova",         icon: "💥", desc: "Reach 10 billion Logans per second.",  cond: () => cpsRaw() >= 1e10 },
+  { id: "b7", name: "Logan Galaxy",            icon: "🌠", desc: "Own 600 buildings.",                   cond: () => totalBuildings() >= 600 },
+  { id: "s4", name: "Centurion",               icon: "💯", desc: "Own 100 of a single building.",        cond: s => Math.max(...s.buildings) >= 100 },
+  { id: "g5", name: "Golden Legend",           icon: "🌞", desc: "Click 150 Golden Logans.",             cond: s => s.goldenClicked >= 150 },
+  { id: "w1", name: "Gotta Go Fast",           icon: "🏃", desc: "Tame a Wild Logan.",                   cond: s => s.wildClicked >= 1 },
+  { id: "w2", name: "Logan Whisperer",         icon: "🐎", desc: "Tame 10 Wild Logans.",                 cond: s => s.wildClicked >= 10 },
+  { id: "k1", name: "Combo Rookie",            icon: "🔥", desc: "Reach a 25-click combo.",              cond: s => s.records.bestCombo >= 25 },
+  { id: "k2", name: "Combo Master",            icon: "🌋", desc: "Reach a 100-click combo.",             cond: s => s.records.bestCombo >= 100 },
+  { id: "r1", name: "Heavy Hitter",            icon: "🥊", desc: "Deal 1 million Logans in one click.",  cond: s => s.records.biggestClick >= 1e6 },
+  { id: "r2", name: "One-Punch Logan",         icon: "👊", desc: "Deal 10 billion Logans in one click.", cond: s => s.records.biggestClick >= 1e10 },
+  { id: "u4", name: "Completionist",           icon: "🏅", desc: "Purchase 80 upgrades.",                cond: () => owned.size >= 80 },
+];
+
+// transcendence perks — unlocked automatically at Golden Glasses thresholds
+const PERKS = [
+  { req: 1,  name: "Head Start",       icon: "🚀", desc: "Each run starts with 200 Logans per Golden Glass." },
+  { req: 5,  name: "Golden Sense",     icon: "🔔", desc: "Golden Logans appear 15% more often." },
+  { req: 10, name: "Deep Pockets",     icon: "👖", desc: "Offline earnings cap increased by 2 hours." },
+  { req: 25, name: "Logan's Blessing", icon: "🙌", desc: "All production +25%." },
+];
+function hasPerk(req) { return state.prestigeLevel >= req; }
+
+const SPEECH_LINES = [
+  "Keep clicking, I believe in you!",
+  "I felt that one.",
+  "My face is going slightly numb.",
+  "Another day, another billion Logans.",
+  "My glasses? Insured.",
+  "I'm basically the economy now.",
+  "Have you tried the golden me? He's great.",
+  "Do my pixels look okay today?",
+  "This tickles.",
+  "You're doing great, by the way.",
+  "Somewhere, a Logan clone just high-fived.",
+  "Remember to blink occasionally.",
+  "The prophecy said you would click.",
+  "I saw a wild version of me earlier. Weird guy.",
+  "Clicking me is technically cardio.",
+  "One more upgrade. You've earned it.",
 ];
 
 const TICKER_LINES = [
@@ -681,6 +813,11 @@ const TICKER_LINES = [
   "New study: 9 out of 10 dentists recommend clicking Logan.",
   "Logan Prism wins award for 'Shiniest Object of the Year.'",
   "Rumor: somewhere out there is a Logan made entirely of gold.",
+  "Wild Logans spotted migrating west. Keep your cursor ready.",
+  "Logan AI passes the Logan Test with flying Logans.",
+  "Local Logan achieves singularity, remains humble.",
+  "Logan's Unicorn denies existing, is clearly visible.",
+  "Combo experts recommend clicking with two fingers. Or ten.",
 ];
 
 // ============================================================
@@ -698,7 +835,10 @@ let state = {
   ascensions: 0,
   prestigeLevel: 0,
   playTime: 0,
-  options: { sound: true },
+  runTime: 0,
+  wildClicked: 0,
+  records: { biggestClick: 0, bestCps: 0, bestCombo: 0 },
+  options: { sound: true, volume: 60 },
   savedAt: Date.now(),
 };
 let owned = new Set();          // upgrade ids
@@ -707,7 +847,7 @@ let buffs = {};                 // id -> {label, kind:'cps'|'click', mult, until
 let bulkMode = "1";             // "1" | "10" | "100" | "max"
 
 // cached multipliers (recalc() refreshes)
-let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1 };
+let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1, offlineCapSec: 3600 };
 
 // ============================================================
 // Helpers
@@ -738,6 +878,7 @@ function recalc() {
   M.critMult = 10;
   M.goldenFreq = 1;
   M.goldenDur = 1;
+  M.offlineCapSec = 3600;
   let pets = 1;
   owned.forEach(id => {
     const u = UPGRADE_BY_ID[id];
@@ -749,8 +890,11 @@ function recalc() {
     else if (u.kind === "crit") { M.critChance += u.chance; M.critMult = Math.max(M.critMult, u.mult); }
     else if (u.kind === "goldenFreq") M.goldenFreq *= u.mult;
     else if (u.kind === "goldenDur") M.goldenDur *= u.mult;
+    else if (u.kind === "offline") M.offlineCapSec = Math.max(M.offlineCapSec, u.capH * 3600);
   });
-  M.cpsGlobal = pets * (1 + 0.01 * unlockedAch.size) * (1 + 0.02 * state.prestigeLevel);
+  if (hasPerk(5)) M.goldenFreq *= 0.85;
+  if (hasPerk(10)) M.offlineCapSec += 7200;
+  M.cpsGlobal = pets * (1 + 0.01 * unlockedAch.size) * (1 + 0.02 * state.prestigeLevel) * (hasPerk(25) ? 1.25 : 1);
 }
 
 function buffMult(kind) {
@@ -814,7 +958,7 @@ function tone(freq, start, dur, vol, type) {
   const o = actx.createOscillator(), g = actx.createGain();
   o.type = type || "triangle";
   o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, actx.currentTime + start);
+  g.gain.setValueAtTime(vol * ((state.options.volume == null ? 60 : state.options.volume) / 60), actx.currentTime + start);
   g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + start + dur);
   o.connect(g); g.connect(actx.destination);
   o.start(actx.currentTime + start);
@@ -822,9 +966,10 @@ function tone(freq, start, dur, vol, type) {
 }
 
 function sfx(kind) {
-  if (!state.options.sound || !actx) return;
+  if (!state.options.sound || !actx || state.options.volume === 0) return;
   try {
     if (kind === "click") tone(380 + Math.random() * 80, 0, 0.06, 0.04);
+    else if (kind === "wild") { tone(500, 0, 0.07, 0.06); tone(750, 0.06, 0.07, 0.06); tone(1000, 0.12, 0.12, 0.06); }
     else if (kind === "crit") { tone(700, 0, 0.08, 0.06); tone(1050, 0.05, 0.1, 0.05); }
     else if (kind === "buy") { tone(392, 0, 0.08, 0.05); tone(523, 0.07, 0.1, 0.05); }
     else if (kind === "upgrade") { tone(523, 0, 0.08, 0.05); tone(659, 0.07, 0.08, 0.05); tone(784, 0.14, 0.12, 0.05); }
@@ -837,6 +982,13 @@ function sfx(kind) {
 // ============================================================
 // Toast / tooltip / modal
 // ============================================================
+function bump() {
+  const c = $("counter");
+  c.classList.remove("pop");
+  void c.offsetWidth;
+  c.classList.add("pop");
+}
+
 let toastTimer;
 function toast(msg, award) {
   const el = $("toast");
@@ -906,6 +1058,7 @@ function buyUpgrade(u) {
   owned.add(u.id);
   recalc();
   sfx("upgrade");
+  bump();
   updateShop();
   updateCounters();
 }
@@ -954,7 +1107,8 @@ function initBuildings() {
       '<span class="icon"></span>' +
       '<span class="info"><span class="name"></span>' +
       '<span class="rate-line" style="display:block"></span>' +
-      '<span class="cost" style="display:block"></span></span>' +
+      '<span class="cost" style="display:block"></span>' +
+      '<span class="tier-bar"><span class="tier-fill"></span></span></span>' +
       '<span class="owned"></span>';
     btn.addEventListener("click", () => {
       const info = bulkInfo(i);
@@ -962,16 +1116,20 @@ function initBuildings() {
       state.logans -= info.total;
       state.buildings[i] += info.n;
       sfx("buy");
+      bump();
       updateShop();
       updateCounters();
     });
     bindTip(btn, () => {
       if (!buildingDiscovered(i)) return '<div class="tt-name">???</div><div class="tt-desc">A mysterious new helper. Earn more Logans to find out!</div>';
       const each = b.rate * M.bMult[i] * M.cpsGlobal;
+      const nt = TIERS.find(t => state.buildings[i] < t.req);
       return '<div class="tt-name">' + b.icon + " " + b.name + '</div>' +
         '<div class="tt-desc">' + b.desc + '</div>' +
         '<div class="tt-line">Each produces <b style="color:var(--gold)">' + fmt(each) + '/s</b></div>' +
-        (state.buildings[i] ? '<div class="tt-line">' + state.buildings[i] + ' owned, producing <b style="color:var(--gold)">' + fmt(each * state.buildings[i]) + '/s</b></div>' : "");
+        (state.buildings[i] ? '<div class="tt-line">' + state.buildings[i] + ' owned, producing <b style="color:var(--gold)">' + fmt(each * state.buildings[i]) + '/s</b></div>' : "") +
+        '<div class="tt-line" style="color:var(--muted)">Next one pays for itself in ' + fmtTime(buildingCost(i) / each) + '</div>' +
+        (nt ? '<div class="tt-line" style="color:var(--muted)">Efficiency boost unlocks at ' + nt.req + ' owned</div>' : "");
     });
     list.appendChild(btn);
     buildingEls.push(btn);
@@ -1001,6 +1159,12 @@ function updateBuildings() {
     costEl.classList.toggle("affordable", ok);
     btn.querySelector(".owned").textContent = state.buildings[i] || "";
     btn.disabled = !ok;
+    const nt = TIERS.find(t => state.buildings[i] < t.req);
+    const bar = btn.querySelector(".tier-bar");
+    if (discovered && nt && state.buildings[i] > 0) {
+      bar.style.display = "";
+      btn.querySelector(".tier-fill").style.width = (state.buildings[i] / nt.req * 100) + "%";
+    } else bar.style.display = "none";
     if (!discovered) shownMystery = true;
   });
 }
@@ -1044,7 +1208,8 @@ function updateStats() {
     statLine("Per second", fmt(cps()), true) +
     statLine("Per click", fmt(clickPower())) +
     statLine("Buildings owned", totalBuildings()) +
-    statLine("Upgrades owned", owned.size);
+    statLine("Upgrades owned", owned.size) +
+    statLine("Run time", fmtTime(state.runTime));
   $("stats-life").innerHTML =
     statLine("Earned all-time", fmt(Math.floor(state.everLogans)), true) +
     statLine("Total clicks", fmt(state.totalClicks)) +
@@ -1060,6 +1225,13 @@ function updateStats() {
   });
   $("building-breakdown").innerHTML = bd || '<div class="stat-line"><span class="k">Nothing yet — buy a building!</span></div>';
 
+  $("stats-records").innerHTML =
+    statLine("Biggest click", fmt(state.records.biggestClick), true) +
+    statLine("Best combo", "×" + state.records.bestCombo) +
+    statLine("Best per-second", fmt(state.records.bestCps), true) +
+    statLine("Wild Logans tamed", state.wildClicked) +
+    statLine("Offline cap", fmtTime(M.offlineCapSec));
+
   const lvl = prestigeLevelFor(state.everLogans);
   const gain = Math.max(0, lvl - state.prestigeLevel);
   const nextAt = 1e7 * Math.pow(lvl + 1, 3);
@@ -1068,6 +1240,10 @@ function updateStats() {
     statLine("CPS bonus", "+" + (state.prestigeLevel * 2) + "%", true) +
     statLine("Transcend now for", "+" + gain + " 👓") +
     statLine("Next glass at", fmt(nextAt) + " all-time");
+  $("perk-list").innerHTML = PERKS.map(p =>
+    '<div class="perk-line' + (hasPerk(p.req) ? "" : " locked") + '">' +
+    '<span>' + p.icon + '</span><span class="p-name">' + p.name + '</span>' +
+    '<span class="p-desc">' + (hasPerk(p.req) ? p.desc : "Unlocks at " + p.req + " 👓 — " + p.desc) + '</span></div>').join("");
   const btn = $("ascend-btn");
   btn.disabled = gain <= 0;
   btn.textContent = gain > 0 ? "🦋 Transcend (+" + gain + " Golden Glasses)" : "🦋 Transcend (earn more first)";
@@ -1082,10 +1258,13 @@ $("ascend-btn").addEventListener("click", () => {
   state.ascensions++;
   state.logans = 0;
   state.totalLogans = 0;
+  state.runTime = 0;
   state.buildings = BUILDINGS.map(() => 0);
   owned = new Set();
   buffs = {};
   recalc();
+  if (hasPerk(1)) state.logans = 200 * state.prestigeLevel;
+  dispBank = state.logans;
   sfx("ascend");
   flash(0.9);
   toast("🦋 Transcended! You now own " + state.prestigeLevel + " Golden Glasses (+" + state.prestigeLevel * 2 + "% CPS).", true);
@@ -1140,6 +1319,7 @@ function checkAchievements() {
   if (got) {
     state.achievements = [...unlockedAch];
     recalc();
+    updateRing();
     if (!$("tab-awards").classList.contains("hidden")) renderAwards();
   }
 }
@@ -1148,7 +1328,7 @@ function checkAchievements() {
 // Counters / buffs UI
 // ============================================================
 function updateCounters() {
-  const bank = Math.floor(state.logans);
+  const bank = Math.floor(dispBank);
   $("counter").textContent = fmt(bank) + " Logan" + (bank === 1 ? "" : "s");
   $("cps").textContent = "per second: " + fmt(cps());
   $("click-power-label").textContent = "+" + fmt(clickPower()) + " per click" + (M.critChance > 0 ? " (" + Math.round(M.critChance * 100) + "% crit ×" + M.critMult + ")" : "");
@@ -1176,17 +1356,34 @@ function updateBuffs() {
 // Clicking
 // ============================================================
 const loganImg = $("logan");
+let combo = 0, lastClickAt = 0;
+
+function updateCombo() {
+  const row = $("combo-row");
+  if (combo >= 5) {
+    row.classList.add("show");
+    $("combo-text").textContent = "🔥 Combo ×" + combo + " (+" + (Math.min(combo, 100) * 0.5).toFixed(1).replace(/\.0$/, "") + "%)";
+    $("combo-fill").style.width = Math.min(combo, 100) + "%";
+  } else row.classList.remove("show");
+}
+
 loganImg.addEventListener("pointerdown", e => {
-  let gain = clickPower();
+  const now = Date.now();
+  combo = (now - lastClickAt <= 900) ? combo + 1 : 1;
+  lastClickAt = now;
+  if (combo > state.records.bestCombo) state.records.bestCombo = combo;
+  let gain = clickPower() * (1 + Math.min(combo, 100) * 0.005);
   let crit = false;
   if (M.critChance > 0 && Math.random() < M.critChance) { gain *= M.critMult; crit = true; }
   earn(gain);
   state.totalClicks++;
+  if (gain > state.records.biggestClick) state.records.biggestClick = gain;
 
   loganImg.classList.add("squish");
   setTimeout(() => loganImg.classList.remove("squish"), 90);
 
   const wrap = $("logan-wrap");
+  if (crit) { wrap.classList.remove("shake"); void wrap.offsetWidth; wrap.classList.add("shake"); }
   const rect = wrap.getBoundingClientRect();
   const span = document.createElement("span");
   span.className = "float-num" + (crit ? " crit" : "");
@@ -1198,6 +1395,7 @@ loganImg.addEventListener("pointerdown", e => {
 
   sfx(crit ? "crit" : "click");
   updateCounters();
+  updateCombo();
 });
 
 // ============================================================
@@ -1258,6 +1456,70 @@ goldenEl.addEventListener("pointerdown", () => {
 });
 
 // ============================================================
+// Wild Logan — sprints across the screen, click to tame
+// ============================================================
+const wildEl = $("wild");
+let wildTimeout;
+
+function scheduleWild() {
+  clearTimeout(wildTimeout);
+  wildTimeout = setTimeout(spawnWild, (180 + Math.random() * 240) * 1000);
+}
+
+function spawnWild() {
+  if (document.hidden) { scheduleWild(); return; }
+  const fromLeft = Math.random() < 0.5;
+  wildEl.style.top = (15 + Math.random() * 60) + "vh";
+  wildEl.style.left = "-90px";
+  wildEl.style.transition = "none";
+  wildEl.style.transform = fromLeft ? "translateX(0)" : "translateX(calc(100vw + 180px))";
+  wildEl.style.display = "block";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    wildEl.style.transition = "transform 7s linear";
+    wildEl.style.transform = fromLeft ? "translateX(calc(100vw + 180px))" : "translateX(0)";
+  }));
+  wildTimeout = setTimeout(() => { wildEl.style.display = "none"; scheduleWild(); }, 7300);
+}
+
+wildEl.addEventListener("pointerdown", () => {
+  wildEl.style.display = "none";
+  clearTimeout(wildTimeout);
+  state.wildClicked++;
+  const bonus = Math.max(Math.floor(cps() * 300), 500);
+  earn(bonus);
+  sfx("wild");
+  flash(0.25);
+  toast("🏃 You tamed a Wild Logan! +" + fmt(bonus) + " Logans!");
+  updateCounters();
+  scheduleWild();
+});
+
+// ============================================================
+// Logan speaks
+// ============================================================
+let speechTimeout;
+function scheduleSpeech() {
+  clearTimeout(speechTimeout);
+  speechTimeout = setTimeout(() => {
+    if (!document.hidden) {
+      const el = $("speech");
+      el.textContent = SPEECH_LINES[Math.floor(Math.random() * SPEECH_LINES.length)];
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 5500);
+    }
+    scheduleSpeech();
+  }, (35 + Math.random() * 45) * 1000);
+}
+
+// ============================================================
+// Achievement progress ring
+// ============================================================
+function updateRing() {
+  const pct = unlockedAch.size / ACHIEVEMENTS.length * 100;
+  $("ach-ring").style.background = "conic-gradient(var(--gold) " + pct + "%, rgba(255,255,255,.07) " + pct + "% 100%)";
+}
+
+// ============================================================
 // News ticker
 // ============================================================
 let lastLine = -1;
@@ -1288,6 +1550,8 @@ $("opt-sound").addEventListener("click", () => {
   updateSoundBtn();
   sfx("buy");
 });
+$("opt-volume").addEventListener("input", e => { state.options.volume = +e.target.value; });
+$("opt-volume").addEventListener("change", () => sfx("buy"));
 
 function encodeSave() {
   return btoa(unescape(encodeURIComponent(JSON.stringify(serialize()))));
@@ -1322,7 +1586,7 @@ $("opt-wipe").addEventListener("click", () => {
 // ============================================================
 function serialize() {
   return {
-    version: 2,
+    version: 3,
     logans: state.logans,
     totalLogans: state.totalLogans,
     everLogans: state.everLogans,
@@ -1334,6 +1598,9 @@ function serialize() {
     ascensions: state.ascensions,
     prestigeLevel: state.prestigeLevel,
     playTime: state.playTime,
+    runTime: state.runTime,
+    wildClicked: state.wildClicked,
+    records: state.records,
     options: state.options,
     savedAt: Date.now(),
   };
@@ -1357,7 +1624,15 @@ function load() {
     state.ascensions = s.ascensions || 0;
     state.prestigeLevel = s.prestigeLevel || 0;
     state.playTime = s.playTime || 0;
+    state.runTime = s.runTime || 0;
+    state.wildClicked = s.wildClicked || 0;
+    if (s.records) {
+      state.records.biggestClick = s.records.biggestClick || 0;
+      state.records.bestCps = s.records.bestCps || 0;
+      state.records.bestCombo = s.records.bestCombo || 0;
+    }
     if (s.options && typeof s.options.sound === "boolean") state.options.sound = s.options.sound;
+    if (s.options && typeof s.options.volume === "number") state.options.volume = s.options.volume;
     BUILDINGS.forEach((_, i) => state.buildings[i] = (s.buildings && s.buildings[i]) || 0);
 
     // upgrades: v2 stores ids; v1 stored a boolean array
@@ -1373,8 +1648,8 @@ function load() {
     state.achievements = [...unlockedAch];
     recalc();
 
-    // offline earnings, capped at 1 hour
-    const elapsed = Math.min((Date.now() - (s.savedAt || Date.now())) / 1000, 3600);
+    // offline earnings, capped by M.offlineCapSec (1h base, more with upgrades/perks)
+    const elapsed = Math.min((Date.now() - (s.savedAt || Date.now())) / 1000, M.offlineCapSec);
     const offline = cpsRaw() * elapsed;
     if (offline >= 1) {
       earn(offline);
@@ -1398,13 +1673,29 @@ function accrue() {
   if (dt <= 0) return;
   lastAccrue = now;
   state.playTime += dt;
+  state.runTime += dt;
   const rate = cps();
   if (rate > 0) earn(rate * dt);
 }
-setInterval(() => { accrue(); if (document.hidden) return; updateCounters(); updateBuffs(); }, 1000);
+setInterval(() => {
+  accrue();
+  const c = cps();
+  if (c > state.records.bestCps) state.records.bestCps = c;
+  if (document.hidden) { dispBank = state.logans; return; }
+  updateCounters();
+  updateBuffs();
+}, 1000);
 
+let dispBank = 0;       // displayed bank, eased toward the real value for a smooth count-up
+let lastFrame = performance.now();
 function tick() {
   accrue();
+  const nowF = performance.now();
+  const fdt = Math.min((nowF - lastFrame) / 1000, 0.25);
+  lastFrame = nowF;
+  const diff = state.logans - dispBank;
+  dispBank = Math.abs(diff) < 1 ? state.logans : dispBank + diff * Math.min(1, fdt * 10);
+  if (combo > 0 && Date.now() - lastClickAt > 1100) { combo = 0; updateCombo(); }
   updateCounters();
   updateBuffs();
   requestAnimationFrame(tick);
@@ -1421,11 +1712,16 @@ setInterval(nextTicker, 9000);
 initBuildings();
 recalc();
 load();
+dispBank = state.logans;
+$("opt-volume").value = state.options.volume;
 updateSoundBtn();
+updateRing();
 updateShop();
 updateCounters();
 nextTicker();
 scheduleGolden();
+scheduleWild();
+scheduleSpeech();
 requestAnimationFrame(tick);
 </script>
 </body>
