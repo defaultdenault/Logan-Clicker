@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logan Clicker</title>
+<link rel="icon" href="Logan.png">
+<style>
+  :root {
+    --bg: #141a26;
+    --bg2: #1b2233;
+    --panel: #202a40;
+    --panel2: #263250;
+    --gold: #f5c542;
+    --gold-dim: #b8933a;
+    --text: #eef2fa;
+    --muted: #93a0bd;
+    --green: #6fdb8b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 30% 20%, var(--bg2), var(--bg));
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  #game { display: flex; height: 100vh; }
+
+  /* ===== Left: clicker ===== */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-width: 0;
+  }
+  #title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 3px 0 rgba(0,0,0,.4), 0 0 30px rgba(245,197,66,.25);
+    margin-bottom: .4rem;
+  }
+  #counter { font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 700; }
+  #cps { color: var(--muted); font-size: 1rem; margin-top: .2rem; margin-bottom: 1.6rem; }
+
+  #logan-wrap { position: relative; }
+  #logan {
+    width: clamp(200px, 30vw, 340px);
+    height: clamp(200px, 30vw, 340px);
+    border-radius: 50%;
+    border: 6px solid var(--gold);
+    box-shadow: 0 0 0 8px rgba(245,197,66,.15), 0 12px 40px rgba(0,0,0,.5);
+    cursor: pointer;
+    transition: transform .08s ease;
+    object-fit: cover;
+    display: block;
+  }
+  #logan:hover { transform: scale(1.04); }
+  #logan.squish { transform: scale(.93); }
+  #logan.frenzy-glow {
+    border-color: #ffec8a;
+    box-shadow: 0 0 0 8px rgba(255,236,138,.3), 0 0 60px 10px rgba(255,215,0,.55);
+  }
+
+  #click-power-label { margin-top: 1.4rem; color: var(--muted); font-size: .95rem; }
+  #stats-row { margin-top: .5rem; color: var(--muted); font-size: .85rem; display: flex; gap: 1.5rem; }
+
+  .float-num {
+    position: absolute;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--gold);
+    text-shadow: 0 2px 4px rgba(0,0,0,.6);
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 30;
+  }
+  @keyframes floatUp {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-90px); }
+  }
+
+  /* background Logan rain */
+  .rain {
+    position: fixed;
+    top: -60px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    opacity: .12;
+    pointer-events: none;
+    z-index: 0;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); }
+  }
+
+  /* golden logan */
+  #golden {
+    position: fixed;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    border: 4px solid #ffe27a;
+    cursor: pointer;
+    z-index: 50;
+    filter: sepia(.7) saturate(2.2) brightness(1.1);
+    box-shadow: 0 0 30px 8px rgba(255,215,0,.8);
+    animation: goldenPulse 1s ease-in-out infinite alternate;
+    display: none;
+    object-fit: cover;
+  }
+  @keyframes goldenPulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.12); }
+  }
+
+  #frenzy-banner {
+    position: fixed;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #b8860b, #ffd700, #b8860b);
+    color: #3a2a00;
+    font-weight: 900;
+    padding: .5rem 1.4rem;
+    border-radius: 999px;
+    box-shadow: 0 4px 20px rgba(255,215,0,.5);
+    z-index: 60;
+    display: none;
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel2);
+    border: 1px solid var(--gold-dim);
+    padding: .7rem 1.3rem;
+    border-radius: 10px;
+    font-size: .95rem;
+    z-index: 70;
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; }
+
+  /* ===== Right: shop ===== */
+  #shop {
+    width: 380px;
+    max-width: 45vw;
+    background: rgba(15,20,32,.75);
+    border-left: 2px solid rgba(245,197,66,.25);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  #shop h2 {
+    text-align: center;
+    padding: 1rem 0 .6rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+  }
+  #shop-scroll { overflow-y: auto; flex: 1; padding: 0 .8rem 1rem; }
+  #shop-scroll::-webkit-scrollbar { width: 8px; }
+  #shop-scroll::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
+
+  .section-label {
+    color: var(--muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: .9rem .2rem .4rem;
+  }
+
+  .shop-item {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: .65rem .8rem;
+    margin-bottom: .5rem;
+    cursor: pointer;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    transition: background .15s, border-color .15s, opacity .15s;
+  }
+  .shop-item:hover:not(:disabled) { background: var(--panel2); border-color: var(--gold-dim); }
+  .shop-item:disabled { opacity: .45; cursor: not-allowed; }
+  .shop-item .icon { font-size: 1.9rem; width: 2.4rem; text-align: center; flex-shrink: 0; }
+  .shop-item .info { flex: 1; min-width: 0; }
+  .shop-item .name { font-weight: 700; font-size: .95rem; }
+  .shop-item .desc { color: var(--muted); font-size: .78rem; margin-top: .1rem; }
+  .shop-item .cost { font-size: .85rem; font-weight: 700; color: var(--gold); margin-top: .15rem; }
+  .shop-item .cost.affordable { color: var(--green); }
+  .shop-item .owned {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: rgba(255,255,255,.25);
+    flex-shrink: 0;
+  }
+
+  #reset-row { padding: .6rem .8rem; border-top: 1px solid rgba(255,255,255,.08); text-align: center; }
+  #reset-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,.15);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: .35rem .9rem;
+    font-size: .78rem;
+    cursor: pointer;
+  }
+  #reset-btn:hover { border-color: #e06c6c; color: #e06c6c; }
+
+  @media (max-width: 720px) {
+    #game { flex-direction: column; }
+    #main { flex: none; padding: 1.2rem 0; }
+    #shop { width: 100%; max-width: none; flex: 1; border-left: none; border-top: 2px solid rgba(245,197,66,.25); }
+    body { overflow-y: auto; }
+  }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="main">
+    <div id="title">LOGAN CLICKER</div>
+    <div id="counter">0 Logans</div>
+    <div id="cps">per second: 0</div>
+    <div id="logan-wrap">
+      <img id="logan" src="Logan.png" alt="Logan — click him!" draggable="false">
+    </div>
+    <div id="click-power-label">+1 per click</div>
+    <div id="stats-row">
+      <span id="stat-clicks">Clicks: 0</span>
+      <span id="stat-total">All-time Logans: 0</span>
+    </div>
+  </div>
+
+  <div id="shop">
+    <h2>Shop</h2>
+    <div id="shop-scroll">
+      <div class="section-label">Upgrades</div>
+      <div id="upgrade-list"></div>
+      <div class="section-label">Buildings</div>
+      <div id="building-list"></div>
+    </div>
+    <div id="reset-row"><button id="reset-btn">Reset save</button></div>
+  </div>
+</div>
+
+<img id="golden" src="Logan.png" alt="Golden Logan!" draggable="false">
+<div id="frenzy-banner">FRENZY! x7 — <span id="frenzy-time">20</span>s</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+// ===== Data =====
+const BUILDINGS = [
+  { name: "Auto-Poker",        icon: "\u{1F446}", desc: "A disembodied finger that pokes Logan for you.", baseCost: 15,        rate: 0.1 },
+  { name: "Logan's Alarm Clock", icon: "⏰",  desc: "Keeps Logan awake and producing around the clock.", baseCost: 100,   rate: 1 },
+  { name: "Logan Clone",       icon: "\u{1F9CD}", desc: "Ethically questionable. Extremely productive.", baseCost: 1100,      rate: 8 },
+  { name: "Logan Farm",        icon: "\u{1F33E}", desc: "Free-range Logans, grown locally.", baseCost: 12000,                 rate: 47 },
+  { name: "Logan Factory",     icon: "\u{1F3ED}", desc: "Mass-produces Logans on an industrial scale.", baseCost: 130000,     rate: 260 },
+  { name: "Logan Bank",        icon: "\u{1F3E6}", desc: "Earns compound interest in Logans.", baseCost: 1.4e6,                rate: 1400 },
+  { name: "Logan Temple",      icon: "\u{1F3DB}", desc: "Ancient monks chant Logan's name for tribute.", baseCost: 2e7,       rate: 7800 },
+  { name: "Logan Portal",      icon: "\u{1F300}", desc: "Opens a rift to the Loganverse.", baseCost: 3.3e8,                   rate: 44000 },
+];
+
+const UPGRADES = [
+  { name: "Firm Handshake",     icon: "\u{1F91D}", desc: "Clicks are twice as powerful.",  cost: 100,   mult: 2 },
+  { name: "Double Tap",         icon: "✌️", desc: "Clicks are twice as powerful.", cost: 1000, mult: 2 },
+  { name: "Power Poke",         icon: "\u{1F4AA}", desc: "Clicks are twice as powerful.",  cost: 10000, mult: 2 },
+  { name: "Logan Energy Drink", icon: "⚡",    desc: "Clicks are 3x as powerful.",     cost: 100000, mult: 3 },
+  { name: "Diamond Finger",     icon: "\u{1F48E}", desc: "Clicks are 3x as powerful.",     cost: 1e6,   mult: 3 },
+  { name: "The Logan Touch",    icon: "\u{1F31F}", desc: "Clicks are 5x as powerful.",     cost: 1e7,   mult: 5 },
+];
+
+const SAVE_KEY = "loganClickerSave";
+const COST_GROWTH = 1.15;
+
+// ===== State =====
+let state = {
+  logans: 0,
+  totalLogans: 0,
+  totalClicks: 0,
+  buildings: BUILDINGS.map(() => 0),
+  upgrades: UPGRADES.map(() => false),
+  savedAt: Date.now(),
+};
+let frenzyUntil = 0;
+
+// ===== Helpers =====
+const $ = id => document.getElementById(id);
+
+function fmt(n) {
+  if (n < 1000) return (Math.floor(n * 10) / 10) % 1 === 0 ? String(Math.floor(n)) : n.toFixed(1);
+  const units = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp"];
+  let u = -1;
+  while (n >= 1000 && u < units.length - 1) { n /= 1000; u++; }
+  return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : 2) + units[u];
+}
+
+function buildingCost(i) {
+  return Math.ceil(BUILDINGS[i].baseCost * Math.pow(COST_GROWTH, state.buildings[i]));
+}
+
+function frenzyMult() { return Date.now() < frenzyUntil ? 7 : 1; }
+
+function clickPower() {
+  let p = 1;
+  UPGRADES.forEach((u, i) => { if (state.upgrades[i]) p *= u.mult; });
+  return p * frenzyMult();
+}
+
+function cps() {
+  return BUILDINGS.reduce((sum, b, i) => sum + b.rate * state.buildings[i], 0) * frenzyMult();
+}
+
+function earn(amount) {
+  state.logans += amount;
+  state.totalLogans += amount;
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 4000);
+}
+
+// ===== Shop DOM =====
+const buildingEls = [];
+const upgradeEls = [];
+
+function makeShopItem(parent, icon, name, desc) {
+  const btn = document.createElement("button");
+  btn.className = "shop-item";
+  btn.innerHTML =
+    '<span class="icon">' + icon + '</span>' +
+    '<span class="info"><span class="name">' + name + '</span>' +
+    '<span class="desc" style="display:block">' + desc + '</span>' +
+    '<span class="cost" style="display:block"></span></span>' +
+    '<span class="owned"></span>';
+  parent.appendChild(btn);
+  return btn;
+}
+
+function initShop() {
+  const bList = $("building-list");
+  BUILDINGS.forEach((b, i) => {
+    const btn = makeShopItem(bList, b.icon, b.name, b.desc + " (+" + fmt(b.rate) + "/s)");
+    btn.addEventListener("click", () => {
+      const cost = buildingCost(i);
+      if (state.logans >= cost) {
+        state.logans -= cost;
+        state.buildings[i]++;
+        updateShop();
+        updateCounters();
+      }
+    });
+    buildingEls.push(btn);
+  });
+
+  const uList = $("upgrade-list");
+  UPGRADES.forEach((u, i) => {
+    const btn = makeShopItem(uList, u.icon, u.name, u.desc);
+    btn.addEventListener("click", () => {
+      if (!state.upgrades[i] && state.logans >= u.cost) {
+        state.logans -= u.cost;
+        state.upgrades[i] = true;
+        updateShop();
+        updateCounters();
+      }
+    });
+    upgradeEls.push(btn);
+  });
+}
+
+function updateShop() {
+  BUILDINGS.forEach((b, i) => {
+    const btn = buildingEls[i];
+    const cost = buildingCost(i);
+    const costEl = btn.querySelector(".cost");
+    costEl.textContent = fmt(cost) + " Logans";
+    costEl.classList.toggle("affordable", state.logans >= cost);
+    btn.querySelector(".owned").textContent = state.buildings[i] || "";
+    btn.disabled = state.logans < cost;
+  });
+  UPGRADES.forEach((u, i) => {
+    const btn = upgradeEls[i];
+    if (state.upgrades[i]) { btn.style.display = "none"; return; }
+    btn.style.display = "";
+    const costEl = btn.querySelector(".cost");
+    costEl.textContent = fmt(u.cost) + " Logans";
+    costEl.classList.toggle("affordable", state.logans >= u.cost);
+    btn.disabled = state.logans < u.cost;
+  });
+}
+
+// ===== Counters =====
+function updateCounters() {
+  $("counter").textContent = fmt(Math.floor(state.logans)) + " Logan" + (Math.floor(state.logans) === 1 ? "" : "s");
+  $("cps").textContent = "per second: " + fmt(cps());
+  $("click-power-label").textContent = "+" + fmt(clickPower()) + " per click";
+  $("stat-clicks").textContent = "Clicks: " + fmt(state.totalClicks);
+  $("stat-total").textContent = "All-time Logans: " + fmt(Math.floor(state.totalLogans));
+  document.title = fmt(Math.floor(state.logans)) + " Logan" + (Math.floor(state.logans) === 1 ? "" : "s") + " — Logan Clicker";
+}
+
+// ===== Clicking =====
+const loganImg = $("logan");
+loganImg.addEventListener("pointerdown", e => {
+  const gain = clickPower();
+  earn(gain);
+  state.totalClicks++;
+
+  loganImg.classList.add("squish");
+  setTimeout(() => loganImg.classList.remove("squish"), 90);
+
+  const wrap = $("logan-wrap");
+  const rect = wrap.getBoundingClientRect();
+  const span = document.createElement("span");
+  span.className = "float-num";
+  span.textContent = "+" + fmt(gain);
+  span.style.left = (e.clientX - rect.left + (Math.random() * 30 - 15)) + "px";
+  span.style.top = (e.clientY - rect.top - 10) + "px";
+  wrap.appendChild(span);
+  setTimeout(() => span.remove(), 1000);
+
+  updateCounters();
+  updateShop();
+});
+
+// ===== Logan rain =====
+setInterval(() => {
+  if (document.hidden || document.querySelectorAll(".rain").length > 25) return;
+  const img = document.createElement("img");
+  img.src = "Logan.png";
+  img.className = "rain";
+  img.style.left = Math.random() * 100 + "vw";
+  img.style.animationDuration = (5 + Math.random() * 5) + "s";
+  document.body.appendChild(img);
+  setTimeout(() => img.remove(), 11000);
+}, 1200);
+
+// ===== Golden Logan =====
+const goldenEl = $("golden");
+let goldenTimeout;
+
+function scheduleGolden() {
+  clearTimeout(goldenTimeout);
+  goldenTimeout = setTimeout(spawnGolden, (60 + Math.random() * 90) * 1000);
+}
+
+function spawnGolden() {
+  goldenEl.style.left = (10 + Math.random() * 75) + "vw";
+  goldenEl.style.top = (12 + Math.random() * 70) + "vh";
+  goldenEl.style.display = "block";
+  goldenTimeout = setTimeout(() => { goldenEl.style.display = "none"; scheduleGolden(); }, 12000);
+}
+
+goldenEl.addEventListener("pointerdown", () => {
+  goldenEl.style.display = "none";
+  if (Math.random() < 0.5) {
+    const bonus = Math.max(Math.floor(cps() * 60 + state.logans * 0.1), 100);
+    earn(bonus);
+    toast("✨ Golden Logan! Lucky! +" + fmt(bonus) + " Logans!");
+  } else {
+    frenzyUntil = Date.now() + 20000;
+    toast("✨ Golden Logan! FRENZY — everything x7 for 20 seconds!");
+  }
+  updateCounters();
+  updateShop();
+  scheduleGolden();
+});
+
+function updateFrenzyUI() {
+  const active = Date.now() < frenzyUntil;
+  $("frenzy-banner").style.display = active ? "block" : "none";
+  loganImg.classList.toggle("frenzy-glow", active);
+  if (active) $("frenzy-time").textContent = Math.ceil((frenzyUntil - Date.now()) / 1000);
+}
+
+// ===== Save / load =====
+function save() {
+  state.savedAt = Date.now();
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* private mode etc. */ }
+}
+
+function load() {
+  let raw;
+  try { raw = localStorage.getItem(SAVE_KEY); } catch (e) { return; }
+  if (!raw) return;
+  try {
+    const s = JSON.parse(raw);
+    state.logans = s.logans || 0;
+    state.totalLogans = s.totalLogans || 0;
+    state.totalClicks = s.totalClicks || 0;
+    BUILDINGS.forEach((_, i) => state.buildings[i] = (s.buildings && s.buildings[i]) || 0);
+    UPGRADES.forEach((_, i) => state.upgrades[i] = !!(s.upgrades && s.upgrades[i]));
+
+    // offline earnings, capped at 1 hour
+    const elapsed = Math.min((Date.now() - (s.savedAt || Date.now())) / 1000, 3600);
+    const offline = cps() * elapsed;
+    if (offline >= 1) {
+      earn(offline);
+      toast("While you were gone, Logan earned " + fmt(Math.floor(offline)) + " Logans!");
+    }
+  } catch (e) { /* corrupt save — start fresh */ }
+}
+
+$("reset-btn").addEventListener("click", () => {
+  if (!confirm("Wipe your Logan Clicker save and start over?")) return;
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  location.reload();
+});
+
+setInterval(save, 10000);
+window.addEventListener("beforeunload", save);
+
+// ===== Main loop =====
+let lastTick = performance.now();
+function tick(now) {
+  const dt = Math.min((now - lastTick) / 1000, 1);
+  lastTick = now;
+  const rate = cps();
+  if (rate > 0) earn(rate * dt);
+  updateCounters();
+  updateFrenzyUI();
+  requestAnimationFrame(tick);
+}
+
+// shop affordability refresh (cheaper than every frame)
+setInterval(updateShop, 250);
+
+// ===== Boot =====
+initShop();
+load();
+updateShop();
+updateCounters();
+scheduleGolden();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
