@@ -247,9 +247,9 @@
     border: 1px solid transparent;
     color: var(--muted);
     font: inherit;
-    font-size: .82rem;
+    font-size: .72rem;
     font-weight: 700;
-    padding: .45rem 0;
+    padding: .42rem 0;
     border-radius: 999px;
     cursor: pointer;
     transition: all .15s;
@@ -498,6 +498,79 @@
   #vol-row { display: flex; align-items: center; gap: .7rem; background: var(--card); border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: .6rem .9rem; margin-bottom: .5rem; font-size: .88rem; font-weight: 600; }
   #opt-volume { flex: 1; accent-color: var(--gold); }
 
+  /* skill tree */
+  #skills-summary { background: var(--card); border: 1px solid rgba(245,197,66,.25); border-radius: 12px; padding: .6rem .8rem; margin: .8rem 0 .6rem; font-size: .82rem; line-height: 1.5; }
+  #skills-summary b { color: var(--gold); }
+  #skill-tree { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+  .skill-col-label { text-align: center; color: var(--muted); font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; padding-top: .2rem; }
+  .skill-node {
+    display: flex; flex-direction: column; align-items: center; gap: .15rem;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: .5rem .3rem;
+    cursor: pointer;
+    font: inherit; color: var(--text);
+    transition: transform .12s, border-color .15s, box-shadow .15s;
+    text-align: center;
+  }
+  .skill-node.span3 { grid-column: 1 / -1; }
+  .skill-node .s-icon { font-size: 1.35rem; line-height: 1; }
+  .skill-node .s-name { font-size: .68rem; font-weight: 700; }
+  .skill-node .s-cost { font-size: .62rem; font-weight: 700; color: var(--muted); }
+  .skill-node.owned { background: linear-gradient(180deg, #6b520f, #4a3a0c); border-color: var(--gold-dim); }
+  .skill-node.owned .s-cost { color: var(--gold-bright); }
+  .skill-node.avail { border-color: var(--gold); box-shadow: 0 0 10px rgba(245,197,66,.3); }
+  .skill-node.avail:hover { transform: translateY(-2px); }
+  .skill-node.locked { opacity: .38; cursor: not-allowed; }
+
+  /* worlds / dimensions */
+  #worlds-note { color: var(--muted); font-size: .78rem; margin: .8rem .2rem .5rem; line-height: 1.5; }
+  .dim-card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 12px;
+    padding: .7rem .8rem;
+    margin-bottom: .6rem;
+  }
+  .dim-card.here { border-color: var(--gold-dim); box-shadow: 0 0 12px rgba(245,197,66,.2); }
+  .dim-head { display: flex; gap: .7rem; align-items: center; }
+  .dim-face { width: 58px; height: 58px; border-radius: 50%; border: 3px solid var(--gold); object-fit: cover; flex-shrink: 0; }
+  .dim-info { flex: 1; min-width: 0; }
+  .dim-name { font-weight: 800; font-size: .92rem; }
+  .dim-flavor { color: var(--muted); font-size: .74rem; margin-top: .1rem; }
+  .dim-bonus { color: var(--gold); font-size: .74rem; font-weight: 600; margin-top: .15rem; }
+  .dim-action {
+    background: var(--panel2);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    font: inherit; font-size: .74rem; font-weight: 700;
+    padding: .3rem .7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .dim-action:disabled { opacity: .45; cursor: not-allowed; }
+  .dim-action.here-btn { background: linear-gradient(180deg, #6b520f, #4a3a0c); }
+  .dim-upgs { display: flex; gap: .4rem; margin-top: .55rem; }
+  .dim-upg {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: .1rem;
+    background: rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 10px;
+    padding: .4rem .2rem;
+    cursor: pointer;
+    font: inherit; color: var(--text);
+    transition: border-color .15s, opacity .15s;
+  }
+  .dim-upg .du-icon { font-size: 1.2rem; line-height: 1; }
+  .dim-upg .du-cost { font-size: .6rem; font-weight: 700; color: var(--gold); }
+  .dim-upg:hover:not(:disabled):not(.owned) { border-color: var(--gold); }
+  .dim-upg:disabled { opacity: .4; cursor: not-allowed; }
+  .dim-upg.owned { border-color: var(--gold-dim); background: linear-gradient(180deg, #574410, #3c300b); cursor: default; }
+  .dim-upg.owned .du-cost { color: var(--green); }
+
   /* vignette over play area */
   #main::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -538,6 +611,8 @@
   <div id="shop">
     <div id="tabs">
       <button class="tab-btn active" data-tab="shop">Shop</button>
+      <button class="tab-btn" data-tab="skills">Skills</button>
+      <button class="tab-btn" data-tab="worlds">Worlds</button>
       <button class="tab-btn" data-tab="stats">Stats</button>
       <button class="tab-btn" data-tab="awards">Awards</button>
       <button class="tab-btn" data-tab="options">Options</button>
@@ -556,6 +631,16 @@
         <button class="bulk-btn" data-bulk="max">Max</button>
       </div>
       <div id="building-list"></div>
+    </div>
+
+    <div id="tab-skills" class="tab-page hidden">
+      <div id="skills-summary"></div>
+      <div id="skill-tree"></div>
+    </div>
+
+    <div id="tab-worlds" class="tab-page hidden">
+      <div id="worlds-note">Open portals to distant worlds. Each open portal multiplies ALL production ×1.5, and each world offers unique upgrades. Visit a world to click its Logan and gain its visit bonus. Portals stay open through Transcendence.</div>
+      <div id="dim-list"></div>
     </div>
 
     <div id="tab-stats" class="tab-page hidden">
@@ -683,6 +768,23 @@ defUpgrade({ id: "blessed-aura",      name: "Blessed Aura",      icon: "🌠", c
 defUpgrade({ id: "logan-daydream",   name: "Logan Daydream",  icon: "💤", cost: 1e7,  kind: "offline", capH: 4,  desc: "Offline earnings accumulate for up to 4 hours." });
 defUpgrade({ id: "logan-deep-dream", name: "Deep Logan Dream", icon: "🌙", cost: 1e10, kind: "offline", capH: 12, desc: "Offline earnings accumulate for up to 12 hours." });
 
+// dimensional upgrades — shown in the Worlds tab, not the shop grid
+defUpgrade({ id: "mars-war-drums",    dim: "mars",     name: "Martian War Drums",  icon: "🥁", cost: 2e8,  kind: "crit", chance: 0.05, mult: 10, desc: "+5% crit chance. The drums demand violence." });
+defUpgrade({ id: "mars-dust-knuckles", dim: "mars",    name: "Red Dust Knuckles",  icon: "👊", cost: 1e9,  kind: "click", mult: 2, desc: "Clicks are twice as powerful." });
+defUpgrade({ id: "mars-mons-gym",     dim: "mars",     name: "Olympus Mons Gym",   icon: "🏋️", cost: 5e9,  kind: "critPlus", plus: 10, desc: "Crits hit for +10x more." });
+defUpgrade({ id: "nep-cryo",          dim: "neptunia", name: "Cryo Sleep Pods",    icon: "🧊", cost: 2e10, kind: "offlinePlus", capH: 6, desc: "Offline earnings cap +6 hours." });
+defUpgrade({ id: "nep-current",       dim: "neptunia", name: "Deep Current",       icon: "🌊", cost: 1e11, kind: "cpsMult", mult: 1.15, desc: "All production +15%." });
+defUpgrade({ id: "nep-fishing",       dim: "neptunia", name: "Ice Fishing",        icon: "🎣", cost: 5e11, kind: "luckyMult", mult: 2, desc: "Lucky golden payouts are doubled." });
+defUpgrade({ id: "vul-furnace",       dim: "vulcanis", name: "Eternal Furnace",    icon: "🔥", cost: 2e12, kind: "frenzySet", val: 9, desc: "Frenzy multiplies production ×9 instead of ×7." });
+defUpgrade({ id: "vul-overdrive",     dim: "vulcanis", name: "Magma Overdrive",    icon: "🌋", cost: 1e13, kind: "cpsMult", mult: 1.20, desc: "All production +20%." });
+defUpgrade({ id: "vul-flare",         dim: "vulcanis", name: "Solar Flare",        icon: "☀️", cost: 5e13, kind: "stormSet", val: 111, desc: "Click Storm multiplies clicks ×111 instead of ×77." });
+defUpgrade({ id: "zor-tech",          dim: "zorgon",   name: "Alien Tech",         icon: "🛠️", cost: 2e14, kind: "cpsMult", mult: 1.10, desc: "All production +10%. Do not lick the tools." });
+defUpgrade({ id: "zor-beam",          dim: "zorgon",   name: "Abduction Beam",     icon: "🛸", cost: 1e15, kind: "wildMult", mult: 3, desc: "Wild Logan rewards are tripled." });
+defUpgrade({ id: "zor-telepathy",     dim: "zorgon",   name: "Telepathic Clicks",  icon: "🧠", cost: 5e15, kind: "clickCps", pct: 0.05, desc: "Clicks also gain +5% of your Logans per second." });
+defUpgrade({ id: "void-whispers",     dim: "void",     name: "Void Whispers",      icon: "🌑", cost: 2e16, kind: "achRate", val: 0.015, desc: "Achievements give +1.5% CPS each instead of +1%." });
+defUpgrade({ id: "void-horizon",      dim: "void",     name: "Event Horizon",      icon: "⚫", cost: 1e17, kind: "glassRate", val: 0.03, desc: "Golden Glasses give +3% CPS each instead of +2%." });
+defUpgrade({ id: "void-matter",       dim: "void",     name: "Dark Matter",        icon: "✴️", cost: 5e17, kind: "cpsMult", mult: 1.5, desc: "All production +50%. Made of 96% nothing." });
+
 // building tier upgrades
 const TIERS = [
   { req: 1,   costMult: 10,    adj: "Improved" },
@@ -707,6 +809,39 @@ BUILDINGS.forEach((b, i) => {
 
 const UPGRADE_BY_ID = {};
 UPGRADES.forEach(u => UPGRADE_BY_ID[u.id] = u);
+const DIM_UPG_IDS = UPGRADES.filter(u => u.dim).map(u => u.id);
+
+// dimensions — alien Logans on other worlds
+const DIMENSIONS = [
+  { id: "earth",    name: "Earth",     icon: "🌍", cost: 0,    filter: "",                                                         accent: "#f5c542", flavor: "Home sweet home.",                                    visitDesc: "The original Logan. No visit bonus, only nostalgia." },
+  { id: "mars",     name: "Mars",      icon: "🔴", cost: 5e7,  filter: "sepia(.5) hue-rotate(-30deg) saturate(2.4)",               accent: "#ff6b4a", flavor: "Crimson Logan trains daily in the low gravity.",      visitDesc: "Clicks ×2 while visiting." },
+  { id: "neptunia", name: "Neptunia",  icon: "🔵", cost: 5e9,  filter: "hue-rotate(180deg) saturate(1.6)",                         accent: "#5aa7ff", flavor: "Frost Logan thinks very cool thoughts.",              visitDesc: "Golden Logans appear 20% more often while visiting." },
+  { id: "vulcanis", name: "Vulcanis",  icon: "🟠", cost: 5e11, filter: "sepia(.8) saturate(3) hue-rotate(-15deg) brightness(1.05)", accent: "#ffa02e", flavor: "Ember Logan is, technically, on fire.",               visitDesc: "Golden effects last 25% longer while visiting." },
+  { id: "zorgon",   name: "Zorgon-7",  icon: "🟢", cost: 5e13, filter: "hue-rotate(70deg) saturate(1.8)",                          accent: "#7ce27c", flavor: "Zorgon Logan communicates in clicks. Convenient.",    visitDesc: "+25% production while visiting." },
+  { id: "void",     name: "The Void",  icon: "🟣", cost: 5e15, filter: "grayscale(.5) brightness(.8) hue-rotate(230deg) saturate(2)", accent: "#a78bfa", flavor: "Shadow Logan smiles at nothing. Nothing smiles back.", visitDesc: "+10% crit chance while visiting." },
+];
+const DIM_BY_ID = {};
+DIMENSIONS.forEach(d => DIM_BY_ID[d.id] = d);
+
+// skill tree — bought with Skill Points from Logan Levels & Transcendence
+const SKILLS = [
+  { id: "sk-root", name: "Logan's Awakening",  icon: "🌅", cost: 1, req: [],           fx: { cps: 1.05 },      desc: "+5% all production. The journey begins." },
+  { id: "sk-a1",   name: "Iron Finger",        icon: "☝️", cost: 1, req: ["sk-root"],  fx: { click: 1.5 },     desc: "Clicks +50%." },
+  { id: "sk-a2",   name: "Thunder Thumb",      icon: "⛈️", cost: 2, req: ["sk-a1"],    fx: { crit: 0.03 },     desc: "+3% crit chance." },
+  { id: "sk-a3",   name: "Fist of Logan",      icon: "✊", cost: 3, req: ["sk-a2"],    fx: { click: 2 },       desc: "Clicks ×2." },
+  { id: "sk-a4",   name: "The Thousand Hands", icon: "🙏", cost: 4, req: ["sk-a3"],    fx: { clickCps: 0.10 }, desc: "Clicks also gain +10% of your CPS." },
+  { id: "sk-b1",   name: "Efficient Blueprints", icon: "📐", cost: 1, req: ["sk-root"], fx: { cost: 0.95 },    desc: "Buildings are 5% cheaper." },
+  { id: "sk-b2",   name: "Mass Production",    icon: "⚙️", cost: 2, req: ["sk-b1"],    fx: { cps: 1.15 },      desc: "+15% all production." },
+  { id: "sk-b3",   name: "Logan Logistics",    icon: "🚚", cost: 3, req: ["sk-b2"],    fx: { cps: 1.25 },      desc: "+25% all production." },
+  { id: "sk-b4",   name: "Loganomics",         icon: "📈", cost: 4, req: ["sk-b3"],    fx: { cost: 0.90 },     desc: "Buildings are another 10% cheaper." },
+  { id: "sk-c1",   name: "Four-Leaf Logan",    icon: "🍀", cost: 1, req: ["sk-root"],  fx: { gFreq: 0.9 },     desc: "Golden Logans appear 10% more often." },
+  { id: "sk-c2",   name: "Gilded Age",         icon: "🏆", cost: 2, req: ["sk-c1"],    fx: { gDur: 1.2 },      desc: "Golden effects last 20% longer." },
+  { id: "sk-c3",   name: "Wild Instincts",     icon: "🐾", cost: 3, req: ["sk-c2"],    fx: { wFreq: 0.5, wMult: 2 }, desc: "Wild Logans appear twice as often and pay double." },
+  { id: "sk-c4",   name: "Fate's Favorite",    icon: "🎰", cost: 4, req: ["sk-c3"],    fx: { lucky: 2 },       desc: "Lucky golden payouts ×2." },
+  { id: "sk-ult",  name: "Logan, Eternal",     icon: "👑", cost: 6, req: ["sk-a4", "sk-b4", "sk-c4"], fx: { cps: 2 }, desc: "ALL production ×2. You have mastered the Logan." },
+];
+const SKILL_BY_ID = {};
+SKILLS.forEach(s => SKILL_BY_ID[s.id] = s);
 
 // achievements
 const ACHIEVEMENTS = [
@@ -760,6 +895,11 @@ const ACHIEVEMENTS = [
   { id: "r1", name: "Heavy Hitter",            icon: "🥊", desc: "Deal 1 million Logans in one click.",  cond: s => s.records.biggestClick >= 1e6 },
   { id: "r2", name: "One-Punch Logan",         icon: "👊", desc: "Deal 10 billion Logans in one click.", cond: s => s.records.biggestClick >= 1e10 },
   { id: "u4", name: "Completionist",           icon: "🏅", desc: "Purchase 80 upgrades.",                cond: () => owned.size >= 80 },
+  { id: "d1", name: "Interplanetary",          icon: "🛸", desc: "Open your first portal.",              cond: s => s.dimensions.length >= 1 },
+  { id: "d2", name: "Multiversal",             icon: "🪐", desc: "Open every portal.",                   cond: s => s.dimensions.length >= 5 },
+  { id: "d3", name: "Xenophile",               icon: "👽", desc: "Buy every dimensional upgrade.",       cond: () => DIM_UPG_IDS.every(id => owned.has(id)) },
+  { id: "sk1", name: "Student of Logan",       icon: "📖", desc: "Learn your first skill.",              cond: s => s.skills.length >= 1 },
+  { id: "sk2", name: "Tree Hugger",            icon: "🌳", desc: "Complete the entire skill tree.",      cond: s => s.skills.length >= SKILLS.length },
 ];
 
 // transcendence perks — unlocked automatically at Golden Glasses thresholds
@@ -788,6 +928,10 @@ const SPEECH_LINES = [
   "I saw a wild version of me earlier. Weird guy.",
   "Clicking me is technically cardio.",
   "One more upgrade. You've earned it.",
+  "Have you met my Martian self? Great guy.",
+  "The skill tree tickles when you buy nodes.",
+  "Somewhere in the Void, I'm watching. Sorry.",
+  "Interdimensional me says hi.",
 ];
 
 const TICKER_LINES = [
@@ -818,6 +962,11 @@ const TICKER_LINES = [
   "Local Logan achieves singularity, remains humble.",
   "Logan's Unicorn denies existing, is clearly visible.",
   "Combo experts recommend clicking with two fingers. Or ten.",
+  "Portal technicians report the portals are 'super round' today.",
+  "Crimson Logan of Mars wins local arm-wrestling title. Again.",
+  "Frost Logan of Neptunia releases new album: 'Cool Thoughts.'",
+  "Shadow Logan denies being spooky. The lights flicker anyway.",
+  "Skill tree botanists confirm: the tree is made of pure Logan.",
 ];
 
 // ============================================================
@@ -838,6 +987,9 @@ let state = {
   runTime: 0,
   wildClicked: 0,
   records: { biggestClick: 0, bestCps: 0, bestCombo: 0 },
+  skills: [],
+  dimensions: [],       // unlocked dimension ids (earth is implicit)
+  currentDim: "earth",
   options: { sound: true, volume: 60 },
   savedAt: Date.now(),
 };
@@ -847,7 +999,8 @@ let buffs = {};                 // id -> {label, kind:'cps'|'click', mult, until
 let bulkMode = "1";             // "1" | "10" | "100" | "max"
 
 // cached multipliers (recalc() refreshes)
-let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1, offlineCapSec: 3600 };
+let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1, offlineCapSec: 3600,
+          costMult: 1, wildFreq: 1, wildMult: 1, luckyMult: 1, frenzyPow: 7, stormPow: 77, achRate: 0.01, glassRate: 0.02 };
 
 // ============================================================
 // Helpers
@@ -878,24 +1031,70 @@ function recalc() {
   M.critMult = 10;
   M.goldenFreq = 1;
   M.goldenDur = 1;
-  M.offlineCapSec = 3600;
-  let pets = 1;
+  M.costMult = 1;
+  M.wildFreq = 1;
+  M.wildMult = 1;
+  M.luckyMult = 1;
+  M.frenzyPow = 7;
+  M.stormPow = 77;
+  M.achRate = 0.01;
+  M.glassRate = 0.02;
+  let offMax = 3600, offPlus = 0, critPlus = 0, global = 1;
   owned.forEach(id => {
     const u = UPGRADE_BY_ID[id];
     if (!u) return;
     if (u.kind === "click") M.clickBase *= u.mult;
     else if (u.kind === "building") M.bMult[u.b] *= u.mult;
-    else if (u.kind === "cpsMult") pets *= u.mult;
+    else if (u.kind === "cpsMult") global *= u.mult;
     else if (u.kind === "clickCps") M.clickCpsPct += u.pct;
     else if (u.kind === "crit") { M.critChance += u.chance; M.critMult = Math.max(M.critMult, u.mult); }
+    else if (u.kind === "critPlus") critPlus += u.plus;
     else if (u.kind === "goldenFreq") M.goldenFreq *= u.mult;
     else if (u.kind === "goldenDur") M.goldenDur *= u.mult;
-    else if (u.kind === "offline") M.offlineCapSec = Math.max(M.offlineCapSec, u.capH * 3600);
+    else if (u.kind === "offline") offMax = Math.max(offMax, u.capH * 3600);
+    else if (u.kind === "offlinePlus") offPlus += u.capH * 3600;
+    else if (u.kind === "luckyMult") M.luckyMult *= u.mult;
+    else if (u.kind === "wildMult") M.wildMult *= u.mult;
+    else if (u.kind === "frenzySet") M.frenzyPow = Math.max(M.frenzyPow, u.val);
+    else if (u.kind === "stormSet") M.stormPow = Math.max(M.stormPow, u.val);
+    else if (u.kind === "achRate") M.achRate = Math.max(M.achRate, u.val);
+    else if (u.kind === "glassRate") M.glassRate = Math.max(M.glassRate, u.val);
   });
+  // skill tree
+  state.skills.forEach(id => {
+    const fx = (SKILL_BY_ID[id] || {}).fx;
+    if (!fx) return;
+    if (fx.cps) global *= fx.cps;
+    if (fx.click) M.clickBase *= fx.click;
+    if (fx.crit) M.critChance += fx.crit;
+    if (fx.clickCps) M.clickCpsPct += fx.clickCps;
+    if (fx.cost) M.costMult *= fx.cost;
+    if (fx.gFreq) M.goldenFreq *= fx.gFreq;
+    if (fx.gDur) M.goldenDur *= fx.gDur;
+    if (fx.wFreq) M.wildFreq *= fx.wFreq;
+    if (fx.wMult) M.wildMult *= fx.wMult;
+    if (fx.lucky) M.luckyMult *= fx.lucky;
+  });
+  // dimensions: passive bonus per open portal, plus a bonus for the world you're visiting
+  global *= Math.pow(1.5, state.dimensions.length);
+  const here = state.currentDim;
+  if (here === "mars") M.clickBase *= 2;
+  else if (here === "neptunia") M.goldenFreq *= 0.8;
+  else if (here === "vulcanis") M.goldenDur *= 1.25;
+  else if (here === "zorgon") global *= 1.25;
+  else if (here === "void") M.critChance += 0.10;
+  // transcendence perks
   if (hasPerk(5)) M.goldenFreq *= 0.85;
-  if (hasPerk(10)) M.offlineCapSec += 7200;
-  M.cpsGlobal = pets * (1 + 0.01 * unlockedAch.size) * (1 + 0.02 * state.prestigeLevel) * (hasPerk(25) ? 1.25 : 1);
+  M.critMult += critPlus;
+  M.offlineCapSec = offMax + offPlus + (hasPerk(10) ? 7200 : 0);
+  M.cpsGlobal = global * (1 + M.achRate * unlockedAch.size) * (1 + M.glassRate * state.prestigeLevel) * (hasPerk(25) ? 1.25 : 1);
 }
+
+// skill points
+function loganLevel() { return state.everLogans >= 1e3 ? Math.floor(Math.log(state.everLogans / 1e3) / Math.log(3)) + 1 : 0; }
+function spTotal() { return loganLevel() + 3 * state.ascensions; }
+function spSpent() { return state.skills.reduce((a, id) => a + ((SKILL_BY_ID[id] || {}).cost || 0), 0); }
+function spAvail() { return spTotal() - spSpent(); }
 
 function buffMult(kind) {
   let m = 1;
@@ -916,7 +1115,7 @@ function clickPower() {
 function totalBuildings() { return state.buildings.reduce((a, b) => a + b, 0); }
 
 function buildingCost(i, extra) {
-  return Math.ceil(BUILDINGS[i].baseCost * Math.pow(G, state.buildings[i] + (extra || 0)));
+  return Math.ceil(BUILDINGS[i].baseCost * Math.pow(G, state.buildings[i] + (extra || 0)) * M.costMult);
 }
 
 // bulk purchase info: {n, total} for current bulkMode
@@ -975,6 +1174,8 @@ function sfx(kind) {
     else if (kind === "upgrade") { tone(523, 0, 0.08, 0.05); tone(659, 0.07, 0.08, 0.05); tone(784, 0.14, 0.12, 0.05); }
     else if (kind === "golden") { tone(659, 0, 0.1, 0.06); tone(880, 0.08, 0.1, 0.06); tone(1175, 0.16, 0.16, 0.06); }
     else if (kind === "award") { tone(784, 0, 0.12, 0.05); tone(988, 0.1, 0.2, 0.05); }
+    else if (kind === "portal") { tone(180, 0, 0.25, 0.06, "sawtooth"); tone(360, 0.15, 0.25, 0.05); tone(720, 0.3, 0.35, 0.05); }
+    else if (kind === "skill") { tone(440, 0, 0.1, 0.05); tone(554, 0.08, 0.1, 0.05); tone(659, 0.16, 0.15, 0.05); }
     else if (kind === "ascend") { tone(262, 0, 0.2, 0.06); tone(392, 0.15, 0.2, 0.06); tone(523, 0.3, 0.3, 0.06); tone(784, 0.45, 0.4, 0.05); }
   } catch (e) {}
 }
@@ -1047,6 +1248,7 @@ const upgTiles = {};   // id -> element
 let upgKey = "";
 
 function upgradeVisible(u) {
+  if (u.dim) return false; // dimensional upgrades live in the Worlds tab
   if (owned.has(u.id)) return false;
   if (u.kind === "building") return state.buildings[u.b] >= u.req;
   return state.everLogans >= u.cost / 5;
@@ -1186,12 +1388,204 @@ document.querySelectorAll(".bulk-btn").forEach(btn => {
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === btn));
-    ["shop", "stats", "awards", "options"].forEach(t =>
+    ["shop", "skills", "worlds", "stats", "awards", "options"].forEach(t =>
       $("tab-" + t).classList.toggle("hidden", t !== btn.dataset.tab));
     if (btn.dataset.tab === "awards") renderAwards();
     if (btn.dataset.tab === "stats") updateStats();
+    if (btn.dataset.tab === "skills") updateSkills();
+    if (btn.dataset.tab === "worlds") updateWorlds();
   });
 });
+
+// ============================================================
+// Skills tab
+// ============================================================
+const skillEls = {};
+
+function skillOwned(id) { return state.skills.includes(id); }
+function skillAvailable(s) { return !skillOwned(s.id) && s.req.every(skillOwned) && spAvail() >= s.cost; }
+
+function buySkill(s) {
+  if (!skillAvailable(s)) return;
+  state.skills.push(s.id);
+  recalc();
+  sfx("skill");
+  bump();
+  toast("🌟 Skill learned: " + s.icon + " " + s.name + "!");
+  updateSkills();
+  updateCounters();
+  updateShop();
+}
+
+function renderSkills() {
+  const tree = $("skill-tree");
+  tree.innerHTML = "";
+  const addNode = (s, span3) => {
+    const btn = document.createElement("button");
+    btn.className = "skill-node" + (span3 ? " span3" : "");
+    btn.innerHTML = '<span class="s-icon">' + s.icon + '</span><span class="s-name">' + s.name + '</span><span class="s-cost">' + s.cost + ' SP</span>';
+    btn.addEventListener("click", () => buySkill(s));
+    bindTip(btn, () => {
+      const reqNames = s.req.map(id => SKILL_BY_ID[id].name).join(", ");
+      return '<div class="tt-name">' + s.icon + " " + s.name + '</div>' +
+        '<div class="tt-desc">' + s.desc + '</div>' +
+        (reqNames ? '<div class="tt-line" style="color:var(--muted)">Requires: ' + reqNames + '</div>' : "") +
+        (skillOwned(s.id)
+          ? '<div class="tt-line" style="color:var(--green)">Learned!</div>'
+          : '<div class="tt-cost" style="color:' + (spAvail() >= s.cost ? "var(--green)" : "var(--red)") + '">' + s.cost + " skill point" + (s.cost === 1 ? "" : "s") + '</div>');
+    });
+    skillEls[s.id] = btn;
+    tree.appendChild(btn);
+  };
+  addNode(SKILL_BY_ID["sk-root"], true);
+  ["Finger", "Industry", "Luck"].forEach(l => {
+    const d = document.createElement("div");
+    d.className = "skill-col-label";
+    d.textContent = l;
+    tree.appendChild(d);
+  });
+  for (let row = 1; row <= 4; row++) ["a", "b", "c"].forEach(br => addNode(SKILL_BY_ID["sk-" + br + row], false));
+  addNode(SKILL_BY_ID["sk-ult"], true);
+  updateSkills();
+}
+
+function updateSkills() {
+  if ($("tab-skills").classList.contains("hidden")) return;
+  $("skills-summary").innerHTML =
+    "Skill points: <b>" + spAvail() + " available</b> (" + spSpent() + " spent)<br>" +
+    "Logan Level <b>" + loganLevel() + "</b> — next level at " + fmt(1e3 * Math.pow(3, loganLevel())) + " all-time Logans.<br>" +
+    "<span style='color:var(--muted);font-size:.74rem'>+1 SP per Logan Level, +3 SP per Transcendence. Skills are permanent.</span>";
+  SKILLS.forEach(s => {
+    const el = skillEls[s.id];
+    el.classList.toggle("owned", skillOwned(s.id));
+    el.classList.toggle("avail", skillAvailable(s));
+    el.classList.toggle("locked", !skillOwned(s.id) && !skillAvailable(s));
+    el.disabled = !skillAvailable(s) && !skillOwned(s.id);
+  });
+}
+
+// ============================================================
+// Worlds tab
+// ============================================================
+const dimEls = {};
+
+function dimUnlocked(id) { return id === "earth" || state.dimensions.includes(id); }
+
+function applySkin() {
+  const d = DIM_BY_ID[state.currentDim] || DIMENSIONS[0];
+  loganImg.style.filter = d.filter;
+  loganImg.style.borderColor = d.accent;
+}
+
+function unlockDim(d) {
+  if (dimUnlocked(d.id) || state.logans < d.cost) return;
+  state.logans -= d.cost;
+  state.dimensions.push(d.id);
+  recalc();
+  sfx("portal");
+  flash(0.5);
+  bump();
+  toast("🌀 Portal opened! " + d.icon + " Welcome to " + d.name + " — all production ×1.5!", true);
+  updateWorlds();
+  updateShop();
+  updateCounters();
+  save();
+}
+
+function visitDim(d) {
+  if (!dimUnlocked(d.id) || state.currentDim === d.id) return;
+  state.currentDim = d.id;
+  applySkin();
+  recalc();
+  sfx("portal");
+  toast(d.icon + " Now visiting " + d.name + ". " + d.visitDesc);
+  updateWorlds();
+  updateCounters();
+}
+
+function renderWorlds() {
+  const list = $("dim-list");
+  list.innerHTML = "";
+  DIMENSIONS.forEach(d => {
+    const card = document.createElement("div");
+    card.className = "dim-card";
+    const dimUpgs = UPGRADES.filter(u => u.dim === d.id);
+    card.innerHTML =
+      '<div class="dim-head">' +
+        '<img class="dim-face" src="Logan.png" draggable="false">' +
+        '<div class="dim-info">' +
+          '<div class="dim-name">' + d.icon + " " + d.name + '</div>' +
+          '<div class="dim-flavor">' + d.flavor + '</div>' +
+          '<div class="dim-bonus"></div>' +
+        '</div>' +
+        '<button class="dim-action"></button>' +
+      '</div>' +
+      (dimUpgs.length ? '<div class="dim-upgs"></div>' : "");
+    const face = card.querySelector(".dim-face");
+    face.style.borderColor = d.accent;
+    const actionBtn = card.querySelector(".dim-action");
+    actionBtn.addEventListener("click", () => dimUnlocked(d.id) ? visitDim(d) : unlockDim(d));
+    const upgBtns = {};
+    const upgRow = card.querySelector(".dim-upgs");
+    dimUpgs.forEach(u => {
+      const b = document.createElement("button");
+      b.className = "dim-upg";
+      b.innerHTML = '<span class="du-icon">' + u.icon + '</span><span class="du-cost"></span>';
+      b.addEventListener("click", () => {
+        if (owned.has(u.id)) return;
+        buyUpgrade(u);
+        updateWorlds();
+      });
+      bindTip(b, () =>
+        '<div class="tt-name">' + u.icon + " " + u.name + '</div>' +
+        '<div class="tt-desc">' + u.desc + '</div>' +
+        (owned.has(u.id)
+          ? '<div class="tt-line" style="color:var(--green)">Owned!</div>'
+          : '<div class="tt-cost" style="color:' + (state.logans >= u.cost ? "var(--green)" : "var(--red)") + '">' + fmt(u.cost) + " Logans</div>"));
+      upgBtns[u.id] = b;
+      upgRow.appendChild(b);
+    });
+    dimEls[d.id] = { card, face, actionBtn, upgBtns, upgRow, bonus: card.querySelector(".dim-bonus") };
+    list.appendChild(card);
+  });
+  updateWorlds();
+}
+
+function updateWorlds() {
+  if ($("tab-worlds").classList.contains("hidden")) return;
+  DIMENSIONS.forEach(d => {
+    const el = dimEls[d.id];
+    const un = dimUnlocked(d.id);
+    const here = state.currentDim === d.id;
+    el.card.classList.toggle("here", here);
+    el.face.style.filter = un ? d.filter : "brightness(.15)";
+    el.bonus.textContent = un ? d.visitDesc : "Locked — open a portal to meet this Logan.";
+    if (here) {
+      el.actionBtn.textContent = "You are here";
+      el.actionBtn.disabled = true;
+      el.actionBtn.classList.add("here-btn");
+    } else if (un) {
+      el.actionBtn.textContent = "Visit";
+      el.actionBtn.disabled = false;
+      el.actionBtn.classList.remove("here-btn");
+    } else {
+      el.actionBtn.textContent = "Open Portal — " + fmt(d.cost);
+      el.actionBtn.disabled = state.logans < d.cost;
+      el.actionBtn.classList.remove("here-btn");
+    }
+    if (el.upgRow) {
+      el.upgRow.style.display = un ? "" : "none";
+      Object.keys(el.upgBtns).forEach(id => {
+        const b = el.upgBtns[id];
+        const u = UPGRADE_BY_ID[id];
+        const has = owned.has(id);
+        b.classList.toggle("owned", has);
+        b.disabled = !has && state.logans < u.cost;
+        b.querySelector(".du-cost").textContent = has ? "✔" : fmt(u.cost);
+      });
+    }
+  });
+}
 
 // ============================================================
 // Stats tab
@@ -1215,7 +1609,10 @@ function updateStats() {
     statLine("Total clicks", fmt(state.totalClicks)) +
     statLine("Golden Logans clicked", state.goldenClicked) +
     statLine("Achievements", unlockedAch.size + " / " + ACHIEVEMENTS.length) +
-    statLine("Achievement bonus", "+" + unlockedAch.size + "% CPS", true) +
+    statLine("Achievement bonus", "+" + (M.achRate * 100 * unlockedAch.size).toFixed(1).replace(/\.0$/, "") + "% CPS", true) +
+    statLine("Logan Level", loganLevel(), true) +
+    statLine("Skill points", spAvail() + " available / " + spTotal() + " total") +
+    statLine("Worlds unlocked", state.dimensions.length + " / " + (DIMENSIONS.length - 1)) +
     statLine("Transcensions", state.ascensions) +
     statLine("Time played", fmtTime(state.playTime));
   let bd = "";
@@ -1253,14 +1650,15 @@ $("ascend-btn").addEventListener("click", () => {
   const lvl = prestigeLevelFor(state.everLogans);
   const gain = lvl - state.prestigeLevel;
   if (gain <= 0) return;
-  if (!confirm("Transcend now?\n\nYou will gain " + gain + " Golden Glasses (+" + gain * 2 + "% CPS forever), but your Logans, buildings, and upgrades will reset.\n\nAchievements, lifetime stats, and glasses are kept.")) return;
+  if (!confirm("Transcend now?\n\nYou will gain " + gain + " Golden Glasses (+" + gain * 2 + "% CPS forever), but your Logans, buildings, and shop upgrades will reset.\n\nAchievements, lifetime stats, glasses, skills, open portals, and dimensional upgrades are all kept.")) return;
   state.prestigeLevel = lvl;
   state.ascensions++;
   state.logans = 0;
   state.totalLogans = 0;
   state.runTime = 0;
   state.buildings = BUILDINGS.map(() => 0);
-  owned = new Set();
+  // dimensional upgrades, skills, and open portals all survive Transcendence
+  owned = new Set([...owned].filter(id => UPGRADE_BY_ID[id] && UPGRADE_BY_ID[id].dim));
   buffs = {};
   recalc();
   if (hasPerk(1)) state.logans = 200 * state.prestigeLevel;
@@ -1406,6 +1804,7 @@ setInterval(() => {
   const img = document.createElement("img");
   img.src = "Logan.png";
   img.className = "rain";
+  img.style.filter = (DIM_BY_ID[state.currentDim] || DIMENSIONS[0]).filter;
   const size = 26 + Math.random() * 34;
   img.style.width = img.style.height = size + "px";
   img.style.left = Math.random() * 100 + "vw";
@@ -1440,15 +1839,15 @@ goldenEl.addEventListener("pointerdown", () => {
   flash(0.35);
   const roll = Math.random();
   if (roll < 0.45) {
-    const bonus = Math.max(Math.floor(Math.min(state.logans * 0.15, cps() * 900)), 100);
+    const bonus = Math.max(Math.floor(Math.min(state.logans * 0.15, cps() * 900) * M.luckyMult), Math.floor(100 * M.luckyMult));
     earn(bonus);
     toast("✨ Golden Logan! Lucky! +" + fmt(bonus) + " Logans!");
   } else if (roll < 0.9) {
-    buffs.frenzy = { label: "✨ Frenzy ×7", kind: "cps", mult: 7, until: Date.now() + 20000 * M.goldenDur };
-    toast("✨ Golden Logan! FRENZY — production ×7 for " + Math.round(20 * M.goldenDur) + " seconds!");
+    buffs.frenzy = { label: "✨ Frenzy ×" + M.frenzyPow, kind: "cps", mult: M.frenzyPow, until: Date.now() + 20000 * M.goldenDur };
+    toast("✨ Golden Logan! FRENZY — production ×" + M.frenzyPow + " for " + Math.round(20 * M.goldenDur) + " seconds!");
   } else {
-    buffs.storm = { label: "⚡ Click Storm ×77", kind: "click", mult: 77, until: Date.now() + 13000 * M.goldenDur };
-    toast("⚡ Golden Logan! CLICK STORM — clicks ×77 for " + Math.round(13 * M.goldenDur) + " seconds! GO GO GO!");
+    buffs.storm = { label: "⚡ Click Storm ×" + M.stormPow, kind: "click", mult: M.stormPow, until: Date.now() + 13000 * M.goldenDur };
+    toast("⚡ Golden Logan! CLICK STORM — clicks ×" + M.stormPow + " for " + Math.round(13 * M.goldenDur) + " seconds! GO GO GO!");
   }
   updateCounters();
   updateShop();
@@ -1463,7 +1862,7 @@ let wildTimeout;
 
 function scheduleWild() {
   clearTimeout(wildTimeout);
-  wildTimeout = setTimeout(spawnWild, (180 + Math.random() * 240) * 1000);
+  wildTimeout = setTimeout(spawnWild, (180 + Math.random() * 240) * 1000 * M.wildFreq);
 }
 
 function spawnWild() {
@@ -1485,7 +1884,7 @@ wildEl.addEventListener("pointerdown", () => {
   wildEl.style.display = "none";
   clearTimeout(wildTimeout);
   state.wildClicked++;
-  const bonus = Math.max(Math.floor(cps() * 300), 500);
+  const bonus = Math.floor(Math.max(cps() * 300, 500) * M.wildMult);
   earn(bonus);
   sfx("wild");
   flash(0.25);
@@ -1586,7 +1985,10 @@ $("opt-wipe").addEventListener("click", () => {
 // ============================================================
 function serialize() {
   return {
-    version: 3,
+    version: 4,
+    skills: state.skills,
+    dimensions: state.dimensions,
+    currentDim: state.currentDim,
     logans: state.logans,
     totalLogans: state.totalLogans,
     everLogans: state.everLogans,
@@ -1633,6 +2035,9 @@ function load() {
     }
     if (s.options && typeof s.options.sound === "boolean") state.options.sound = s.options.sound;
     if (s.options && typeof s.options.volume === "number") state.options.volume = s.options.volume;
+    if (Array.isArray(s.skills)) state.skills = s.skills.filter(id => SKILL_BY_ID[id]);
+    if (Array.isArray(s.dimensions)) state.dimensions = s.dimensions.filter(id => DIM_BY_ID[id] && id !== "earth");
+    state.currentDim = (s.currentDim && DIM_BY_ID[s.currentDim] && (s.currentDim === "earth" || state.dimensions.includes(s.currentDim))) ? s.currentDim : "earth";
     BUILDINGS.forEach((_, i) => state.buildings[i] = (s.buildings && s.buildings[i]) || 0);
 
     // upgrades: v2 stores ids; v1 stored a boolean array
@@ -1701,7 +2106,7 @@ function tick() {
   requestAnimationFrame(tick);
 }
 
-setInterval(updateShop, 250);
+setInterval(() => { updateShop(); updateSkills(); updateWorlds(); }, 250);
 setInterval(updateStats, 500);
 setInterval(checkAchievements, 1000);
 setInterval(nextTicker, 9000);
@@ -1713,6 +2118,9 @@ initBuildings();
 recalc();
 load();
 dispBank = state.logans;
+applySkin();
+renderSkills();
+renderWorlds();
 $("opt-volume").value = state.options.volume;
 updateSoundBtn();
 updateRing();
