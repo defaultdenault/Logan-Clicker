@@ -7,21 +7,28 @@
 <link rel="icon" href="Logan.png">
 <style>
   :root {
-    --bg: #141a26;
-    --bg2: #1b2233;
+    --bg: #10141f;
+    --bg2: #1a2135;
     --panel: #202a40;
-    --panel2: #263250;
+    --panel2: #2a3654;
+    --card: linear-gradient(145deg, #243050, #1b2338);
     --gold: #f5c542;
+    --gold-bright: #ffe27a;
     --gold-dim: #b8933a;
     --text: #eef2fa;
     --muted: #93a0bd;
     --green: #6fdb8b;
+    --red: #e06c6c;
+    --crit: #ff9d47;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
     font-family: "Segoe UI", system-ui, sans-serif;
-    background: radial-gradient(1200px 800px at 30% 20%, var(--bg2), var(--bg));
+    background:
+      radial-gradient(1100px 700px at 25% 15%, rgba(70,90,160,.25), transparent 60%),
+      radial-gradient(900px 700px at 80% 85%, rgba(120,80,40,.12), transparent 60%),
+      linear-gradient(160deg, var(--bg2), var(--bg));
     color: var(--text);
     overflow: hidden;
     user-select: none;
@@ -31,7 +38,7 @@
 
   #game { display: flex; height: 100vh; }
 
-  /* ===== Left: clicker ===== */
+  /* ===================== Left: clicker ===================== */
   #main {
     flex: 1;
     display: flex;
@@ -40,39 +47,93 @@
     justify-content: center;
     position: relative;
     min-width: 0;
+    padding: 0 1rem;
   }
+
+  #ticker {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: .55rem 1rem;
+    text-align: center;
+    font-style: italic;
+    font-size: .88rem;
+    color: var(--muted);
+    background: rgba(0,0,0,.25);
+    border-bottom: 1px solid rgba(245,197,66,.12);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity .5s;
+  }
+  #ticker.fade { opacity: 0; }
+
   #title {
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: clamp(1.8rem, 3.6vw, 3rem);
     font-weight: 900;
-    letter-spacing: 2px;
-    color: var(--gold);
-    text-shadow: 0 3px 0 rgba(0,0,0,.4), 0 0 30px rgba(245,197,66,.25);
-    margin-bottom: .4rem;
+    letter-spacing: 3px;
+    background: linear-gradient(180deg, #ffe9a8, var(--gold) 55%, #c99a2e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.5)) drop-shadow(0 0 24px rgba(245,197,66,.2));
+    margin-bottom: .3rem;
   }
-  #counter { font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 700; }
-  #cps { color: var(--muted); font-size: 1rem; margin-top: .2rem; margin-bottom: 1.6rem; }
+  #counter { font-size: clamp(1.3rem, 2.4vw, 1.9rem); font-weight: 700; text-shadow: 0 0 18px rgba(255,255,255,.15); }
+  #cps { color: var(--gold); font-size: .95rem; margin-top: .15rem; opacity: .9; }
+
+  #buff-row { display: flex; gap: .5rem; height: 2rem; margin: .55rem 0 .3rem; align-items: center; }
+  .buff-pill {
+    background: linear-gradient(90deg, #8a6410, #d4a72c, #8a6410);
+    color: #2a1e00;
+    font-weight: 800;
+    font-size: .8rem;
+    padding: .3rem .8rem;
+    border-radius: 999px;
+    box-shadow: 0 2px 12px rgba(255,215,0,.45);
+    animation: pillPulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes pillPulse { from { transform: scale(1); } to { transform: scale(1.06); } }
 
   #logan-wrap { position: relative; }
+  #sunburst {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 190%; height: 190%;
+    transform: translate(-50%, -50%);
+    background: repeating-conic-gradient(rgba(245,197,66,.5) 0deg 9deg, transparent 9deg 22deg);
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,.9) 0%, transparent 68%);
+    mask-image: radial-gradient(circle, rgba(0,0,0,.9) 0%, transparent 68%);
+    opacity: .14;
+    animation: spin 70s linear infinite;
+    pointer-events: none;
+    border-radius: 50%;
+  }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
   #logan {
-    width: clamp(200px, 30vw, 340px);
-    height: clamp(200px, 30vw, 340px);
+    position: relative;
+    z-index: 1;
+    width: clamp(180px, 27vw, 320px);
+    height: clamp(180px, 27vw, 320px);
     border-radius: 50%;
     border: 6px solid var(--gold);
-    box-shadow: 0 0 0 8px rgba(245,197,66,.15), 0 12px 40px rgba(0,0,0,.5);
+    box-shadow: 0 0 0 8px rgba(245,197,66,.14), 0 12px 44px rgba(0,0,0,.55);
     cursor: pointer;
-    transition: transform .08s ease;
+    transition: transform .08s ease, box-shadow .3s, border-color .3s;
     object-fit: cover;
     display: block;
+    animation: breathe 6s ease-in-out infinite;
   }
+  @keyframes breathe { 0%,100% { scale: 1; } 50% { scale: 1.015; } }
   #logan:hover { transform: scale(1.04); }
   #logan.squish { transform: scale(.93); }
   #logan.frenzy-glow {
-    border-color: #ffec8a;
-    box-shadow: 0 0 0 8px rgba(255,236,138,.3), 0 0 60px 10px rgba(255,215,0,.55);
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 0 8px rgba(255,236,138,.3), 0 0 70px 14px rgba(255,215,0,.55);
   }
 
-  #click-power-label { margin-top: 1.4rem; color: var(--muted); font-size: .95rem; }
-  #stats-row { margin-top: .5rem; color: var(--muted); font-size: .85rem; display: flex; gap: 1.5rem; }
+  #click-power-label { margin-top: 1.1rem; color: var(--muted); font-size: .95rem; }
+  #stats-row { margin-top: .45rem; color: var(--muted); font-size: .82rem; display: flex; gap: 1.4rem; }
 
   .float-num {
     position: absolute;
@@ -83,58 +144,50 @@
     pointer-events: none;
     animation: floatUp 1s ease-out forwards;
     z-index: 30;
+    white-space: nowrap;
   }
+  .float-num.crit { color: var(--crit); font-size: 1.8rem; }
   @keyframes floatUp {
     from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-90px); }
+    to   { opacity: 0; transform: translateY(-95px); }
   }
 
-  /* background Logan rain */
   .rain {
     position: fixed;
-    top: -60px;
-    width: 44px; height: 44px;
+    top: -70px;
     border-radius: 50%;
-    opacity: .12;
+    opacity: .11;
     pointer-events: none;
     z-index: 0;
     animation: fall linear forwards;
   }
-  @keyframes fall {
-    to { transform: translateY(110vh) rotate(360deg); }
-  }
+  @keyframes fall { to { transform: translateY(115vh) rotate(360deg); } }
 
-  /* golden logan */
   #golden {
     position: fixed;
-    width: 90px; height: 90px;
+    width: 92px; height: 92px;
     border-radius: 50%;
-    border: 4px solid #ffe27a;
+    border: 4px solid var(--gold-bright);
     cursor: pointer;
     z-index: 50;
     filter: sepia(.7) saturate(2.2) brightness(1.1);
-    box-shadow: 0 0 30px 8px rgba(255,215,0,.8);
-    animation: goldenPulse 1s ease-in-out infinite alternate;
+    box-shadow: 0 0 34px 10px rgba(255,215,0,.8);
+    animation: goldenPulse .9s ease-in-out infinite alternate;
     display: none;
     object-fit: cover;
   }
   @keyframes goldenPulse {
-    from { transform: scale(1); }
-    to   { transform: scale(1.12); }
+    from { transform: scale(1) rotate(-4deg); }
+    to   { transform: scale(1.12) rotate(4deg); }
   }
 
-  #frenzy-banner {
-    position: fixed;
-    top: 14px; left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, #b8860b, #ffd700, #b8860b);
-    color: #3a2a00;
-    font-weight: 900;
-    padding: .5rem 1.4rem;
-    border-radius: 999px;
-    box-shadow: 0 4px 20px rgba(255,215,0,.5);
-    z-index: 60;
-    display: none;
+  #flash {
+    position: fixed; inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 90;
+    transition: opacity .8s;
   }
 
   #toast {
@@ -152,86 +205,245 @@
     pointer-events: none;
     max-width: 90vw;
     text-align: center;
+    box-shadow: 0 6px 24px rgba(0,0,0,.5);
   }
   #toast.show { opacity: 1; }
+  #toast.award { border-color: var(--gold); box-shadow: 0 0 24px rgba(245,197,66,.35); }
 
-  /* ===== Right: shop ===== */
+  #tooltip {
+    position: fixed;
+    z-index: 100;
+    background: #131a2b;
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: .6rem .8rem;
+    font-size: .82rem;
+    max-width: 260px;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 8px 28px rgba(0,0,0,.6);
+    line-height: 1.45;
+  }
+  #tooltip .tt-name { font-weight: 800; color: var(--gold); font-size: .9rem; }
+  #tooltip .tt-desc { color: var(--muted); margin-top: .15rem; }
+  #tooltip .tt-line { margin-top: .25rem; }
+  #tooltip .tt-cost { margin-top: .3rem; font-weight: 700; }
+
+  /* ===================== Right: panel ===================== */
   #shop {
-    width: 380px;
-    max-width: 45vw;
-    background: rgba(15,20,32,.75);
-    border-left: 2px solid rgba(245,197,66,.25);
+    width: 400px;
+    max-width: 46vw;
+    background: rgba(13,17,28,.82);
+    border-left: 2px solid rgba(245,197,66,.22);
     display: flex;
     flex-direction: column;
     z-index: 10;
+    backdrop-filter: blur(3px);
   }
-  #shop h2 {
-    text-align: center;
-    padding: 1rem 0 .6rem;
-    color: var(--gold);
-    letter-spacing: 3px;
-    font-size: 1.1rem;
-    text-transform: uppercase;
+  #tabs { display: flex; gap: .4rem; padding: .7rem .7rem .5rem; }
+  .tab-btn {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    padding: .45rem 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .15s;
   }
-  #shop-scroll { overflow-y: auto; flex: 1; padding: 0 .8rem 1rem; }
-  #shop-scroll::-webkit-scrollbar { width: 8px; }
-  #shop-scroll::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: linear-gradient(180deg, #6b520f, #4a3a0c); color: var(--gold-bright); border-color: var(--gold-dim); }
+
+  .tab-page { overflow-y: auto; flex: 1; padding: 0 .8rem 1rem; }
+  .tab-page.hidden { display: none; }
+  .tab-page::-webkit-scrollbar { width: 8px; }
+  .tab-page::-webkit-scrollbar-thumb { background: var(--panel2); border-radius: 4px; }
 
   .section-label {
     color: var(--muted);
-    font-size: .75rem;
+    font-size: .72rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin: .9rem .2rem .4rem;
+    margin: .9rem .2rem .45rem;
   }
 
+  /* upgrades grid */
+  #upgrade-grid { display: flex; flex-wrap: wrap; gap: .45rem; min-height: 10px; }
+  .upg-tile {
+    width: 62px; height: 62px;
+    background: var(--card);
+    border: 1px solid rgba(245,197,66,.18);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .1rem;
+    font: inherit;
+    color: var(--text);
+    transition: transform .12s, border-color .15s, opacity .15s;
+  }
+  .upg-tile .u-icon { font-size: 1.5rem; line-height: 1; }
+  .upg-tile .u-cost { font-size: .6rem; font-weight: 700; color: var(--gold); }
+  .upg-tile:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--gold); }
+  .upg-tile:disabled { opacity: .38; cursor: not-allowed; }
+  .upg-tile.affordable { box-shadow: 0 0 12px rgba(245,197,66,.28); }
+  #upgrade-empty { color: var(--muted); font-size: .8rem; padding: .3rem .2rem; }
+
+  /* bulk selector */
+  #bulk-row { display: flex; align-items: center; gap: .35rem; margin: .2rem .1rem .5rem; }
+  #bulk-row span { color: var(--muted); font-size: .78rem; margin-right: .2rem; }
+  .bulk-btn {
+    background: var(--panel);
+    border: 1px solid transparent;
+    color: var(--muted);
+    font: inherit; font-size: .75rem; font-weight: 700;
+    padding: .25rem .7rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .bulk-btn.active { background: var(--panel2); color: var(--gold-bright); border-color: var(--gold-dim); }
+
+  /* building rows */
   .shop-item {
     display: flex;
     align-items: center;
     gap: .8rem;
     width: 100%;
-    background: var(--panel);
-    border: 1px solid transparent;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,.05);
     border-radius: 12px;
-    padding: .65rem .8rem;
+    padding: .6rem .8rem;
     margin-bottom: .5rem;
     cursor: pointer;
     color: var(--text);
     font: inherit;
     text-align: left;
-    transition: background .15s, border-color .15s, opacity .15s;
+    transition: background .15s, border-color .15s, opacity .15s, transform .12s;
   }
-  .shop-item:hover:not(:disabled) { background: var(--panel2); border-color: var(--gold-dim); }
+  .shop-item:hover:not(:disabled) { border-color: var(--gold-dim); transform: translateY(-1px); }
   .shop-item:disabled { opacity: .45; cursor: not-allowed; }
-  .shop-item .icon { font-size: 1.9rem; width: 2.4rem; text-align: center; flex-shrink: 0; }
+  .shop-item .icon { font-size: 1.8rem; width: 2.3rem; text-align: center; flex-shrink: 0; }
   .shop-item .info { flex: 1; min-width: 0; }
-  .shop-item .name { font-weight: 700; font-size: .95rem; }
-  .shop-item .desc { color: var(--muted); font-size: .78rem; margin-top: .1rem; }
-  .shop-item .cost { font-size: .85rem; font-weight: 700; color: var(--gold); margin-top: .15rem; }
+  .shop-item .name { font-weight: 700; font-size: .93rem; }
+  .shop-item .rate-line { color: var(--muted); font-size: .74rem; margin-top: .1rem; }
+  .shop-item .cost { font-size: .84rem; font-weight: 700; color: var(--gold); margin-top: .12rem; }
   .shop-item .cost.affordable { color: var(--green); }
   .shop-item .owned {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
     font-weight: 900;
-    color: rgba(255,255,255,.25);
+    color: rgba(255,255,255,.22);
     flex-shrink: 0;
   }
 
-  #reset-row { padding: .6rem .8rem; border-top: 1px solid rgba(255,255,255,.08); text-align: center; }
-  #reset-btn {
-    background: none;
-    border: 1px solid rgba(255,255,255,.15);
-    color: var(--muted);
+  /* stats tab */
+  .stat-block { background: var(--card); border: 1px solid rgba(255,255,255,.05); border-radius: 12px; padding: .7rem .9rem; margin-bottom: .6rem; }
+  .stat-line { display: flex; justify-content: space-between; font-size: .84rem; padding: .18rem 0; }
+  .stat-line .k { color: var(--muted); }
+  .stat-line .v { font-weight: 700; }
+  .stat-line .v.gold { color: var(--gold); }
+  #prestige-block { border-color: rgba(245,197,66,.35); }
+  #ascend-btn {
+    width: 100%;
+    margin-top: .5rem;
+    background: linear-gradient(180deg, #7a5c10, #513d0a);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-bright);
+    font: inherit; font-weight: 800;
+    padding: .55rem 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  #ascend-btn:hover:not(:disabled) { box-shadow: 0 0 16px rgba(245,197,66,.4); }
+  #ascend-btn:disabled { opacity: .4; cursor: not-allowed; }
+  #building-breakdown .stat-line { font-size: .78rem; }
+
+  /* awards tab */
+  #awards-summary { color: var(--muted); font-size: .82rem; margin: .8rem .2rem .5rem; }
+  #awards-grid { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .award-tile {
+    width: 46px; height: 46px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.35rem;
+    background: var(--card);
+    border: 1px solid rgba(245,197,66,.35);
+    box-shadow: 0 0 8px rgba(245,197,66,.18);
+  }
+  .award-tile.locked { border-color: rgba(255,255,255,.07); box-shadow: none; opacity: .4; filter: grayscale(1); }
+
+  /* options tab */
+  .opt-btn {
+    display: block;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,.09);
+    color: var(--text);
+    font: inherit; font-size: .88rem; font-weight: 600;
+    padding: .6rem .9rem;
+    border-radius: 10px;
+    margin-bottom: .5rem;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color .15s;
+  }
+  .opt-btn:hover { border-color: var(--gold-dim); }
+  .opt-btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .opt-note { color: var(--muted); font-size: .75rem; margin: .6rem .2rem; line-height: 1.5; }
+
+  /* modal */
+  #modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 110;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #modal-overlay.show { display: flex; }
+  #modal {
+    background: var(--bg2);
+    border: 1px solid var(--gold-dim);
+    border-radius: 14px;
+    padding: 1.1rem;
+    width: min(460px, 92vw);
+    box-shadow: 0 12px 48px rgba(0,0,0,.7);
+  }
+  #modal h3 { color: var(--gold); margin-bottom: .6rem; font-size: 1rem; }
+  #modal textarea {
+    width: 100%;
+    height: 110px;
+    background: #0d111c;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 8px;
-    padding: .35rem .9rem;
-    font-size: .78rem;
+    padding: .5rem;
+    font-family: monospace;
+    font-size: .72rem;
+    resize: none;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  #modal .modal-btns { display: flex; gap: .5rem; margin-top: .7rem; justify-content: flex-end; }
+  #modal .modal-btns button {
+    background: var(--panel2);
+    border: 1px solid var(--gold-dim);
+    color: var(--text);
+    font: inherit; font-size: .84rem; font-weight: 700;
+    padding: .4rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
   }
-  #reset-btn:hover { border-color: #e06c6c; color: #e06c6c; }
 
-  @media (max-width: 720px) {
+  @media (max-width: 760px) {
     #game { flex-direction: column; }
-    #main { flex: none; padding: 1.2rem 0; }
-    #shop { width: 100%; max-width: none; flex: 1; border-left: none; border-top: 2px solid rgba(245,197,66,.25); }
+    #main { flex: none; padding: 3rem 0 1.2rem; }
+    #shop { width: 100%; max-width: none; flex: 1; border-left: none; border-top: 2px solid rgba(245,197,66,.22); }
     body { overflow-y: auto; }
   }
 </style>
@@ -239,197 +451,735 @@
 <body>
 <div id="game">
   <div id="main">
+    <div id="ticker"><span id="ticker-text"></span></div>
     <div id="title">LOGAN CLICKER</div>
     <div id="counter">0 Logans</div>
     <div id="cps">per second: 0</div>
+    <div id="buff-row"></div>
     <div id="logan-wrap">
+      <div id="sunburst"></div>
       <img id="logan" src="Logan.png" alt="Logan — click him!" draggable="false">
     </div>
     <div id="click-power-label">+1 per click</div>
     <div id="stats-row">
       <span id="stat-clicks">Clicks: 0</span>
-      <span id="stat-total">All-time Logans: 0</span>
+      <span id="stat-total">All-time: 0</span>
     </div>
   </div>
 
   <div id="shop">
-    <h2>Shop</h2>
-    <div id="shop-scroll">
+    <div id="tabs">
+      <button class="tab-btn active" data-tab="shop">Shop</button>
+      <button class="tab-btn" data-tab="stats">Stats</button>
+      <button class="tab-btn" data-tab="awards">Awards</button>
+      <button class="tab-btn" data-tab="options">Options</button>
+    </div>
+
+    <div id="tab-shop" class="tab-page">
       <div class="section-label">Upgrades</div>
-      <div id="upgrade-list"></div>
+      <div id="upgrade-grid"></div>
+      <div id="upgrade-empty" style="display:none">No upgrades available right now — keep clicking!</div>
       <div class="section-label">Buildings</div>
+      <div id="bulk-row">
+        <span>Buy</span>
+        <button class="bulk-btn active" data-bulk="1">×1</button>
+        <button class="bulk-btn" data-bulk="10">×10</button>
+        <button class="bulk-btn" data-bulk="100">×100</button>
+        <button class="bulk-btn" data-bulk="max">Max</button>
+      </div>
       <div id="building-list"></div>
     </div>
-    <div id="reset-row"><button id="reset-btn">Reset save</button></div>
+
+    <div id="tab-stats" class="tab-page hidden">
+      <div class="section-label">This run</div>
+      <div class="stat-block" id="stats-run"></div>
+      <div class="section-label">Lifetime</div>
+      <div class="stat-block" id="stats-life"></div>
+      <div class="section-label">Production breakdown</div>
+      <div class="stat-block" id="building-breakdown"></div>
+      <div class="section-label">Transcendence</div>
+      <div class="stat-block" id="prestige-block">
+        <div id="prestige-lines"></div>
+        <button id="ascend-btn">Transcend</button>
+      </div>
+    </div>
+
+    <div id="tab-awards" class="tab-page hidden">
+      <div id="awards-summary"></div>
+      <div id="awards-grid"></div>
+    </div>
+
+    <div id="tab-options" class="tab-page hidden">
+      <div class="section-label">Options</div>
+      <button class="opt-btn" id="opt-sound">🔊 Sound: On</button>
+      <button class="opt-btn" id="opt-export">📤 Export save</button>
+      <button class="opt-btn" id="opt-import">📥 Import save</button>
+      <button class="opt-btn danger" id="opt-wipe">🗑️ Wipe save</button>
+      <div class="opt-note">Your game autosaves every 10 seconds and when you close the tab. Offline earnings are collected for up to 1 hour away.<br><br>Made with 💛 for Logan.</div>
+    </div>
   </div>
 </div>
 
 <img id="golden" src="Logan.png" alt="Golden Logan!" draggable="false">
-<div id="frenzy-banner">FRENZY! x7 — <span id="frenzy-time">20</span>s</div>
+<div id="flash"></div>
 <div id="toast"></div>
+<div id="tooltip"></div>
+<div id="modal-overlay">
+  <div id="modal">
+    <h3 id="modal-title"></h3>
+    <textarea id="modal-text" spellcheck="false"></textarea>
+    <div class="modal-btns">
+      <button id="modal-action" style="display:none">Load</button>
+      <button id="modal-close">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 "use strict";
 
-// ===== Data =====
-const BUILDINGS = [
-  { name: "Auto-Poker",        icon: "\u{1F446}", desc: "A disembodied finger that pokes Logan for you.", baseCost: 15,        rate: 0.1 },
-  { name: "Logan's Alarm Clock", icon: "⏰",  desc: "Keeps Logan awake and producing around the clock.", baseCost: 100,   rate: 1 },
-  { name: "Logan Clone",       icon: "\u{1F9CD}", desc: "Ethically questionable. Extremely productive.", baseCost: 1100,      rate: 8 },
-  { name: "Logan Farm",        icon: "\u{1F33E}", desc: "Free-range Logans, grown locally.", baseCost: 12000,                 rate: 47 },
-  { name: "Logan Factory",     icon: "\u{1F3ED}", desc: "Mass-produces Logans on an industrial scale.", baseCost: 130000,     rate: 260 },
-  { name: "Logan Bank",        icon: "\u{1F3E6}", desc: "Earns compound interest in Logans.", baseCost: 1.4e6,                rate: 1400 },
-  { name: "Logan Temple",      icon: "\u{1F3DB}", desc: "Ancient monks chant Logan's name for tribute.", baseCost: 2e7,       rate: 7800 },
-  { name: "Logan Portal",      icon: "\u{1F300}", desc: "Opens a rift to the Loganverse.", baseCost: 3.3e8,                   rate: 44000 },
-];
-
-const UPGRADES = [
-  { name: "Firm Handshake",     icon: "\u{1F91D}", desc: "Clicks are twice as powerful.",  cost: 100,   mult: 2 },
-  { name: "Double Tap",         icon: "✌️", desc: "Clicks are twice as powerful.", cost: 1000, mult: 2 },
-  { name: "Power Poke",         icon: "\u{1F4AA}", desc: "Clicks are twice as powerful.",  cost: 10000, mult: 2 },
-  { name: "Logan Energy Drink", icon: "⚡",    desc: "Clicks are 3x as powerful.",     cost: 100000, mult: 3 },
-  { name: "Diamond Finger",     icon: "\u{1F48E}", desc: "Clicks are 3x as powerful.",     cost: 1e6,   mult: 3 },
-  { name: "The Logan Touch",    icon: "\u{1F31F}", desc: "Clicks are 5x as powerful.",     cost: 1e7,   mult: 5 },
-];
-
+// ============================================================
+// Data
+// ============================================================
 const SAVE_KEY = "loganClickerSave";
-const COST_GROWTH = 1.15;
+const G = 1.15; // building cost growth
 
-// ===== State =====
+const BUILDINGS = [
+  { name: "Auto-Poker",          icon: "👆", desc: "A disembodied finger that pokes Logan for you.",        baseCost: 15,     rate: 0.1 },
+  { name: "Logan's Alarm Clock", icon: "⏰", desc: "Keeps Logan awake and producing around the clock.",     baseCost: 100,    rate: 1 },
+  { name: "Logan Clone",         icon: "🧍", desc: "Ethically questionable. Extremely productive.",         baseCost: 1100,   rate: 8 },
+  { name: "Logan Farm",          icon: "🌾", desc: "Free-range Logans, grown locally.",                     baseCost: 12e3,   rate: 47 },
+  { name: "Logan Factory",       icon: "🏭", desc: "Mass-produces Logans on an industrial scale.",          baseCost: 130e3,  rate: 260 },
+  { name: "Logan Bank",          icon: "🏦", desc: "Earns compound interest in Logans.",                    baseCost: 1.4e6,  rate: 1400 },
+  { name: "Logan Temple",        icon: "🏛️", desc: "Ancient monks chant Logan's name for tribute.",         baseCost: 2e7,    rate: 7800 },
+  { name: "Logan Portal",        icon: "🌀", desc: "Opens a rift to the Loganverse.",                       baseCost: 3.3e8,  rate: 44e3 },
+  { name: "Logan Time Machine",  icon: "⏳", desc: "Retrieves Logans from before they were even clicked.",  baseCost: 5.1e9,  rate: 260e3 },
+  { name: "Logan Condenser",     icon: "⚗️", desc: "Condenses pure Logan essence out of thin air.",         baseCost: 7.5e10, rate: 1.6e6 },
+  { name: "Logan Prism",         icon: "🔷", desc: "Refracts ordinary light into a rainbow of Logans.",     baseCost: 1e12,   rate: 1e7 },
+  { name: "The Loganverse",      icon: "🌌", desc: "An entire universe where everything is Logan.",         baseCost: 1.4e13, rate: 6.5e7 },
+];
+
+// legacy v1 upgrade order — index in old save's boolean array maps to these ids
+const LEGACY_UPGRADE_IDS = ["firm-handshake", "double-tap", "power-poke", "energy-drink", "diamond-finger", "logan-touch"];
+
+const UPGRADES = [];
+function defUpgrade(u) { UPGRADES.push(u); }
+
+// click multipliers
+defUpgrade({ id: "firm-handshake",  name: "Firm Handshake",     icon: "🤝", cost: 100,   kind: "click", mult: 2, desc: "Clicks are twice as powerful." });
+defUpgrade({ id: "double-tap",      name: "Double Tap",         icon: "✌️", cost: 1000,  kind: "click", mult: 2, desc: "Clicks are twice as powerful." });
+defUpgrade({ id: "power-poke",      name: "Power Poke",         icon: "💪", cost: 10e3,  kind: "click", mult: 2, desc: "Clicks are twice as powerful." });
+defUpgrade({ id: "energy-drink",    name: "Logan Energy Drink", icon: "⚡", cost: 100e3, kind: "click", mult: 3, desc: "Clicks are 3x as powerful." });
+defUpgrade({ id: "diamond-finger",  name: "Diamond Finger",     icon: "💎", cost: 1e6,   kind: "click", mult: 3, desc: "Clicks are 3x as powerful." });
+defUpgrade({ id: "logan-touch",     name: "The Logan Touch",    icon: "🌟", cost: 1e7,   kind: "click", mult: 5, desc: "Clicks are 5x as powerful." });
+defUpgrade({ id: "titanium-finger", name: "Titanium Finger",    icon: "🦾", cost: 1e9,   kind: "click", mult: 5, desc: "Clicks are 5x as powerful." });
+defUpgrade({ id: "cosmic-poke",     name: "Cosmic Poke",        icon: "☄️", cost: 1e11,  kind: "click", mult: 7, desc: "Clicks are 7x as powerful." });
+
+// critical clicks
+defUpgrade({ id: "lucky-thumb",  name: "Lucky Thumb",  icon: "🍀", cost: 250e3, kind: "crit", chance: 0.05, mult: 10, desc: "5% chance for clicks to CRIT for 10x." });
+defUpgrade({ id: "golden-thumb", name: "Golden Thumb", icon: "👍", cost: 1e8,   kind: "crit", chance: 0.05, mult: 15, desc: "+5% crit chance, and crits hit for 15x." });
+
+// clicks gain % of CPS
+defUpgrade({ id: "helping-hand", name: "Helping Hand", icon: "🖐️", cost: 5e5, kind: "clickCps", pct: 0.01, desc: "Clicks also gain +1% of your Logans per second." });
+defUpgrade({ id: "team-logan",   name: "Team Logan",   icon: "👥", cost: 5e7, kind: "clickCps", pct: 0.04, desc: "Clicks also gain +4% of your Logans per second." });
+defUpgrade({ id: "logan-army",   name: "Logan Army",   icon: "🎖️", cost: 5e9, kind: "clickCps", pct: 0.05, desc: "Clicks also gain +5% of your Logans per second." });
+
+// pets — global CPS multipliers
+defUpgrade({ id: "pet-hamster", name: "Logan's Hamster", icon: "🐹", cost: 1e6,  kind: "cpsMult", mult: 1.10, desc: "Runs on a wheel. All production +10%." });
+defUpgrade({ id: "pet-cat",     name: "Logan's Cat",     icon: "🐱", cost: 1e8,  kind: "cpsMult", mult: 1.10, desc: "Supervises everything. All production +10%." });
+defUpgrade({ id: "pet-dog",     name: "Logan's Dog",     icon: "🐶", cost: 1e10, kind: "cpsMult", mult: 1.15, desc: "A very good boy. All production +15%." });
+defUpgrade({ id: "pet-dragon",  name: "Logan's Dragon",  icon: "🐉", cost: 1e12, kind: "cpsMult", mult: 1.20, desc: "Do not ask where he got it. All production +20%." });
+
+// golden Logan improvements
+defUpgrade({ id: "logan-magnet", name: "Logan Magnet", icon: "🧲", cost: 5e6, kind: "goldenFreq", mult: 0.7,  desc: "Golden Logans appear 30% more often." });
+defUpgrade({ id: "lucky-aura",   name: "Lucky Aura",   icon: "😇", cost: 5e8, kind: "goldenDur",  mult: 1.3,  desc: "Golden Logan effects last 30% longer." });
+
+// building tier upgrades
+const TIERS = [
+  { req: 1,  costMult: 10,  adj: "Improved" },
+  { req: 10, costMult: 60,  adj: "Turbocharged" },
+  { req: 30, costMult: 600, adj: "Quantum" },
+];
+BUILDINGS.forEach((b, i) => {
+  const shortName = b.name.replace(/^The /, "");
+  TIERS.forEach((t, ti) => {
+    defUpgrade({
+      id: "b" + i + "t" + ti,
+      name: t.adj + " " + shortName + "s",
+      icon: b.icon,
+      cost: b.baseCost * t.costMult,
+      kind: "building", b: i, mult: 2, req: t.req,
+      desc: shortName + "s are twice as efficient. (Requires " + t.req + " owned)",
+    });
+  });
+});
+
+const UPGRADE_BY_ID = {};
+UPGRADES.forEach(u => UPGRADE_BY_ID[u.id] = u);
+
+// achievements
+const ACHIEVEMENTS = [
+  { id: "c1", name: "First Poke",              icon: "👆", desc: "Click Logan once.",                    cond: s => s.totalClicks >= 1 },
+  { id: "c2", name: "Poke Enthusiast",         icon: "👉", desc: "Click Logan 100 times.",               cond: s => s.totalClicks >= 100 },
+  { id: "c3", name: "Finger Athlete",          icon: "💪", desc: "Click Logan 1,000 times.",             cond: s => s.totalClicks >= 1e3 },
+  { id: "c4", name: "Carpal Tunnel Champion",  icon: "🖐️", desc: "Click Logan 10,000 times.",            cond: s => s.totalClicks >= 1e4 },
+  { id: "c5", name: "The Clicking",            icon: "🖱️", desc: "Click Logan 100,000 times.",           cond: s => s.totalClicks >= 1e5 },
+  { id: "e1", name: "Pocket Logans",           icon: "💰", desc: "Earn 100 Logans in total.",            cond: s => s.everLogans >= 100 },
+  { id: "e2", name: "Logan Tycoon",            icon: "🎩", desc: "Earn 10,000 Logans in total.",         cond: s => s.everLogans >= 1e4 },
+  { id: "e3", name: "Logan Millionaire",       icon: "💵", desc: "Earn 1 million Logans in total.",      cond: s => s.everLogans >= 1e6 },
+  { id: "e4", name: "Logan Mogul",             icon: "🏦", desc: "Earn 100 million Logans in total.",    cond: s => s.everLogans >= 1e8 },
+  { id: "e5", name: "Logan Overlord",          icon: "💎", desc: "Earn 10 billion Logans in total.",     cond: s => s.everLogans >= 1e10 },
+  { id: "e6", name: "Trillion Logan March",    icon: "🚀", desc: "Earn 1 trillion Logans in total.",     cond: s => s.everLogans >= 1e12 },
+  { id: "e7", name: "Beyond Loganomics",       icon: "🌌", desc: "Earn 100 trillion Logans in total.",   cond: s => s.everLogans >= 1e14 },
+  { id: "p1", name: "Trickle",                 icon: "💧", desc: "Reach 1 Logan per second.",            cond: () => cpsRaw() >= 1 },
+  { id: "p2", name: "Stream",                  icon: "🌊", desc: "Reach 100 Logans per second.",         cond: () => cpsRaw() >= 100 },
+  { id: "p3", name: "Flood",                   icon: "🌀", desc: "Reach 10,000 Logans per second.",      cond: () => cpsRaw() >= 1e4 },
+  { id: "p4", name: "Logan Tsunami",           icon: "🌪️", desc: "Reach 1 million Logans per second.",   cond: () => cpsRaw() >= 1e6 },
+  { id: "p5", name: "Logan Singularity",       icon: "🕳️", desc: "Reach 100 million Logans per second.", cond: () => cpsRaw() >= 1e8 },
+  { id: "b1", name: "First Hire",              icon: "🧰", desc: "Own 1 building.",                      cond: () => totalBuildings() >= 1 },
+  { id: "b2", name: "Growing Team",            icon: "👷", desc: "Own 10 buildings.",                    cond: () => totalBuildings() >= 10 },
+  { id: "b3", name: "Logan Empire",            icon: "🏰", desc: "Own 50 buildings.",                    cond: () => totalBuildings() >= 50 },
+  { id: "b4", name: "Logan Conglomerate",      icon: "🏢", desc: "Own 100 buildings.",                   cond: () => totalBuildings() >= 100 },
+  { id: "b5", name: "Logan Nation",            icon: "🚩", desc: "Own 200 buildings.",                   cond: () => totalBuildings() >= 200 },
+  { id: "b6", name: "Logan World Order",       icon: "🌍", desc: "Own 400 buildings.",                   cond: () => totalBuildings() >= 400 },
+  { id: "s1", name: "Specialist",              icon: "🎯", desc: "Own 10 of a single building.",         cond: s => Math.max(...s.buildings) >= 10 },
+  { id: "s2", name: "Devoted",                 icon: "❤️", desc: "Own 50 of a single building.",         cond: s => Math.max(...s.buildings) >= 50 },
+  { id: "s3", name: "Collector",               icon: "🧺", desc: "Own at least one of every building.",  cond: s => s.buildings.every(n => n > 0) },
+  { id: "g1", name: "Shiny!",                  icon: "✨", desc: "Click a Golden Logan.",                cond: s => s.goldenClicked >= 1 },
+  { id: "g2", name: "Golden Hunter",           icon: "🏹", desc: "Click 7 Golden Logans.",               cond: s => s.goldenClicked >= 7 },
+  { id: "g3", name: "Midas Touch",             icon: "👑", desc: "Click 27 Golden Logans.",              cond: s => s.goldenClicked >= 27 },
+  { id: "g4", name: "Golden God",              icon: "☀️", desc: "Click 77 Golden Logans.",              cond: s => s.goldenClicked >= 77 },
+  { id: "a1", name: "Transcendent",            icon: "🦋", desc: "Transcend for the first time.",        cond: s => s.ascensions >= 1 },
+  { id: "a2", name: "Serial Ascender",         icon: "🔁", desc: "Transcend 5 times.",                   cond: s => s.ascensions >= 5 },
+  { id: "a3", name: "Rose-Tinted",             icon: "👓", desc: "Own 10 Golden Glasses.",               cond: s => s.prestigeLevel >= 10 },
+  { id: "u1", name: "Upgrader",                icon: "🔧", desc: "Purchase 5 upgrades.",                 cond: () => owned.size >= 5 },
+  { id: "u2", name: "Optimizer",               icon: "⚙️", desc: "Purchase 20 upgrades.",                cond: () => owned.size >= 20 },
+  { id: "u3", name: "Maxed Out",               icon: "🧠", desc: "Purchase 40 upgrades.",                cond: () => owned.size >= 40 },
+  { id: "t1", name: "Veteran Clicker",         icon: "⌛", desc: "Play for a total of 1 hour.",          cond: s => s.playTime >= 3600 },
+];
+
+const TICKER_LINES = [
+  "Logan wakes up feeling extremely clickable today.",
+  "Scientists confirm: clicking Logan releases dopamine.",
+  "Local man Logan now legally classified as a currency.",
+  "Logan spotted smiling. Markets surge.",
+  "\"I just can't stop clicking,\" reports everyone.",
+  "Logan Farms issues recall: some Logans found to be 'too free-range.'",
+  "Logan Bank interest rates hit an all-time Logan.",
+  "Breaking: portal to the Loganverse opens. Logans pour out.",
+  "Logan's glasses insured for 12 billion Logans.",
+  "Meteorologists predict scattered Logan showers this evening.",
+  "Logan Temple monks achieve enlightenment. It looks like Logan.",
+  "Time travelers agree: it was always Logan.",
+  "Golden Logan sightings up 300% this quarter.",
+  "Logan Clone #4082 wins Employee of the Month again.",
+  "Philosophers ask: if you click Logan in a forest, does he smile?",
+  "Logan Factory proudly switches to 100% renewable Logan energy.",
+  "The moon? Also Logan, probably.",
+  "Logan declines interview, cites 'being clicked too much.'",
+  "Economists baffled as Logan outperforms gold, oil, and cookies.",
+  "New study: 9 out of 10 dentists recommend clicking Logan.",
+  "Logan Prism wins award for 'Shiniest Object of the Year.'",
+  "Rumor: somewhere out there is a Logan made entirely of gold.",
+];
+
+// ============================================================
+// State
+// ============================================================
 let state = {
+  version: 2,
   logans: 0,
-  totalLogans: 0,
+  totalLogans: 0,     // earned this run
+  everLogans: 0,      // earned across all runs
   totalClicks: 0,
+  goldenClicked: 0,
   buildings: BUILDINGS.map(() => 0),
-  upgrades: UPGRADES.map(() => false),
+  achievements: [],
+  ascensions: 0,
+  prestigeLevel: 0,
+  playTime: 0,
+  options: { sound: true },
   savedAt: Date.now(),
 };
-let frenzyUntil = 0;
+let owned = new Set();          // upgrade ids
+let unlockedAch = new Set();    // achievement ids
+let buffs = {};                 // id -> {label, kind:'cps'|'click', mult, until}
+let bulkMode = "1";             // "1" | "10" | "100" | "max"
 
-// ===== Helpers =====
+// cached multipliers (recalc() refreshes)
+let M = { clickBase: 1, bMult: [], cpsGlobal: 1, clickCpsPct: 0, critChance: 0, critMult: 10, goldenFreq: 1, goldenDur: 1 };
+
+// ============================================================
+// Helpers
+// ============================================================
 const $ = id => document.getElementById(id);
 
 function fmt(n) {
+  if (!isFinite(n)) return "∞";
+  if (n < 0) return "-" + fmt(-n);
   if (n < 1000) return (Math.floor(n * 10) / 10) % 1 === 0 ? String(Math.floor(n)) : n.toFixed(1);
-  const units = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp"];
+  const units = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
   let u = -1;
   while (n >= 1000 && u < units.length - 1) { n /= 1000; u++; }
   return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : 2) + units[u];
 }
 
-function buildingCost(i) {
-  return Math.ceil(BUILDINGS[i].baseCost * Math.pow(COST_GROWTH, state.buildings[i]));
+function fmtTime(sec) {
+  sec = Math.floor(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return (h ? h + "h " : "") + (h || m ? m + "m " : "") + s + "s";
 }
 
-function frenzyMult() { return Date.now() < frenzyUntil ? 7 : 1; }
+function recalc() {
+  M.clickBase = 1;
+  M.bMult = BUILDINGS.map(() => 1);
+  M.clickCpsPct = 0;
+  M.critChance = 0;
+  M.critMult = 10;
+  M.goldenFreq = 1;
+  M.goldenDur = 1;
+  let pets = 1;
+  owned.forEach(id => {
+    const u = UPGRADE_BY_ID[id];
+    if (!u) return;
+    if (u.kind === "click") M.clickBase *= u.mult;
+    else if (u.kind === "building") M.bMult[u.b] *= u.mult;
+    else if (u.kind === "cpsMult") pets *= u.mult;
+    else if (u.kind === "clickCps") M.clickCpsPct += u.pct;
+    else if (u.kind === "crit") { M.critChance += u.chance; M.critMult = Math.max(M.critMult, u.mult); }
+    else if (u.kind === "goldenFreq") M.goldenFreq *= u.mult;
+    else if (u.kind === "goldenDur") M.goldenDur *= u.mult;
+  });
+  M.cpsGlobal = pets * (1 + 0.01 * unlockedAch.size) * (1 + 0.02 * state.prestigeLevel);
+}
+
+function buffMult(kind) {
+  let m = 1;
+  const now = Date.now();
+  for (const k in buffs) if (buffs[k].until > now && buffs[k].kind === kind) m *= buffs[k].mult;
+  return m;
+}
+
+function cpsRaw() {
+  return BUILDINGS.reduce((sum, b, i) => sum + b.rate * state.buildings[i] * M.bMult[i], 0) * M.cpsGlobal;
+}
+function cps() { return cpsRaw() * buffMult("cps"); }
 
 function clickPower() {
-  let p = 1;
-  UPGRADES.forEach((u, i) => { if (state.upgrades[i]) p *= u.mult; });
-  return p * frenzyMult();
+  return M.clickBase * buffMult("click") + cps() * M.clickCpsPct;
 }
 
-function cps() {
-  return BUILDINGS.reduce((sum, b, i) => sum + b.rate * state.buildings[i], 0) * frenzyMult();
+function totalBuildings() { return state.buildings.reduce((a, b) => a + b, 0); }
+
+function buildingCost(i, extra) {
+  return Math.ceil(BUILDINGS[i].baseCost * Math.pow(G, state.buildings[i] + (extra || 0)));
+}
+
+// bulk purchase info: {n, total} for current bulkMode
+function bulkInfo(i) {
+  let n;
+  if (bulkMode === "max") {
+    n = 0;
+    let spend = 0;
+    while (n < 500) {
+      const c = buildingCost(i, n);
+      if (spend + c > state.logans) break;
+      spend += c; n++;
+    }
+    if (n === 0) return { n: 1, total: buildingCost(i), affordable: false };
+    return { n, total: spend, affordable: true };
+  }
+  n = parseInt(bulkMode, 10);
+  let total = 0;
+  for (let k = 0; k < n; k++) total += buildingCost(i, k);
+  return { n, total, affordable: state.logans >= total };
 }
 
 function earn(amount) {
   state.logans += amount;
   state.totalLogans += amount;
+  state.everLogans += amount;
 }
 
+function prestigeLevelFor(ever) { return Math.floor(Math.cbrt(ever / 1e7)); }
+
+// ============================================================
+// Sound (WebAudio, generated — no files)
+// ============================================================
+let actx = null;
+function initAudio() { if (!actx) try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+document.addEventListener("pointerdown", initAudio, { once: true });
+
+function tone(freq, start, dur, vol, type) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type || "triangle";
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, actx.currentTime + start);
+  g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + start + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(actx.currentTime + start);
+  o.stop(actx.currentTime + start + dur + 0.02);
+}
+
+function sfx(kind) {
+  if (!state.options.sound || !actx) return;
+  try {
+    if (kind === "click") tone(380 + Math.random() * 80, 0, 0.06, 0.04);
+    else if (kind === "crit") { tone(700, 0, 0.08, 0.06); tone(1050, 0.05, 0.1, 0.05); }
+    else if (kind === "buy") { tone(392, 0, 0.08, 0.05); tone(523, 0.07, 0.1, 0.05); }
+    else if (kind === "upgrade") { tone(523, 0, 0.08, 0.05); tone(659, 0.07, 0.08, 0.05); tone(784, 0.14, 0.12, 0.05); }
+    else if (kind === "golden") { tone(659, 0, 0.1, 0.06); tone(880, 0.08, 0.1, 0.06); tone(1175, 0.16, 0.16, 0.06); }
+    else if (kind === "award") { tone(784, 0, 0.12, 0.05); tone(988, 0.1, 0.2, 0.05); }
+    else if (kind === "ascend") { tone(262, 0, 0.2, 0.06); tone(392, 0.15, 0.2, 0.06); tone(523, 0.3, 0.3, 0.06); tone(784, 0.45, 0.4, 0.05); }
+  } catch (e) {}
+}
+
+// ============================================================
+// Toast / tooltip / modal
+// ============================================================
 let toastTimer;
-function toast(msg) {
+function toast(msg, award) {
   const el = $("toast");
   el.textContent = msg;
+  el.classList.toggle("award", !!award);
   el.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("show"), 4000);
 }
 
-// ===== Shop DOM =====
-const buildingEls = [];
-const upgradeEls = [];
-
-function makeShopItem(parent, icon, name, desc) {
-  const btn = document.createElement("button");
-  btn.className = "shop-item";
-  btn.innerHTML =
-    '<span class="icon">' + icon + '</span>' +
-    '<span class="info"><span class="name">' + name + '</span>' +
-    '<span class="desc" style="display:block">' + desc + '</span>' +
-    '<span class="cost" style="display:block"></span></span>' +
-    '<span class="owned"></span>';
-  parent.appendChild(btn);
-  return btn;
+const tipEl = $("tooltip");
+function bindTip(el, html) {
+  el.addEventListener("mouseenter", () => {
+    tipEl.innerHTML = typeof html === "function" ? html() : html;
+    tipEl.style.display = "block";
+  });
+  el.addEventListener("mousemove", e => {
+    const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    let x = e.clientX - w - 14, y = e.clientY + 6;
+    if (x < 6) x = e.clientX + 14;
+    if (y + h > innerHeight - 6) y = innerHeight - h - 6;
+    tipEl.style.left = x + "px";
+    tipEl.style.top = y + "px";
+  });
+  el.addEventListener("mouseleave", () => tipEl.style.display = "none");
 }
 
-function initShop() {
-  const bList = $("building-list");
-  BUILDINGS.forEach((b, i) => {
-    const btn = makeShopItem(bList, b.icon, b.name, b.desc + " (+" + fmt(b.rate) + "/s)");
-    btn.addEventListener("click", () => {
-      const cost = buildingCost(i);
-      if (state.logans >= cost) {
-        state.logans -= cost;
-        state.buildings[i]++;
-        updateShop();
-        updateCounters();
-      }
+function openModal(title, text, editable, onAction) {
+  $("modal-title").textContent = title;
+  const ta = $("modal-text");
+  ta.value = text;
+  ta.readOnly = !editable;
+  const act = $("modal-action");
+  act.style.display = onAction ? "" : "none";
+  act.onclick = onAction ? () => onAction(ta.value) : null;
+  $("modal-overlay").classList.add("show");
+  if (!editable) { ta.focus(); ta.select(); }
+}
+$("modal-close").addEventListener("click", () => $("modal-overlay").classList.remove("show"));
+$("modal-overlay").addEventListener("pointerdown", e => { if (e.target === $("modal-overlay")) $("modal-overlay").classList.remove("show"); });
+
+function flash(strength) {
+  const f = $("flash");
+  f.style.transition = "none";
+  f.style.opacity = strength;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    f.style.transition = "opacity .8s";
+    f.style.opacity = 0;
+  }));
+}
+
+// ============================================================
+// Shop UI — upgrades grid
+// ============================================================
+const upgTiles = {};   // id -> element
+let upgKey = "";
+
+function upgradeVisible(u) {
+  if (owned.has(u.id)) return false;
+  if (u.kind === "building") return state.buildings[u.b] >= u.req;
+  return state.everLogans >= u.cost / 5;
+}
+
+function buyUpgrade(u) {
+  if (owned.has(u.id) || state.logans < u.cost) return;
+  state.logans -= u.cost;
+  owned.add(u.id);
+  recalc();
+  sfx("upgrade");
+  updateShop();
+  updateCounters();
+}
+
+function updateUpgradeGrid() {
+  const vis = UPGRADES.filter(upgradeVisible).sort((a, b) => a.cost - b.cost);
+  const key = vis.map(u => u.id).join(",");
+  const grid = $("upgrade-grid");
+  if (key !== upgKey) {
+    upgKey = key;
+    grid.innerHTML = "";
+    tipEl.style.display = "none";
+    vis.forEach(u => {
+      const btn = document.createElement("button");
+      btn.className = "upg-tile";
+      btn.innerHTML = '<span class="u-icon">' + u.icon + '</span><span class="u-cost">' + fmt(u.cost) + '</span>';
+      btn.addEventListener("click", () => buyUpgrade(u));
+      bindTip(btn, () =>
+        '<div class="tt-name">' + u.icon + " " + u.name + '</div>' +
+        '<div class="tt-desc">' + u.desc + '</div>' +
+        '<div class="tt-cost" style="color:' + (state.logans >= u.cost ? "var(--green)" : "var(--red)") + '">' + fmt(u.cost) + " Logans</div>");
+      upgTiles[u.id] = btn;
+      grid.appendChild(btn);
     });
+  }
+  vis.forEach(u => {
+    const btn = upgTiles[u.id];
+    const ok = state.logans >= u.cost;
+    btn.disabled = !ok;
+    btn.classList.toggle("affordable", ok);
+  });
+  $("upgrade-empty").style.display = vis.length ? "none" : "";
+}
+
+// ============================================================
+// Shop UI — buildings
+// ============================================================
+const buildingEls = [];
+
+function initBuildings() {
+  const list = $("building-list");
+  BUILDINGS.forEach((b, i) => {
+    const btn = document.createElement("button");
+    btn.className = "shop-item";
+    btn.innerHTML =
+      '<span class="icon"></span>' +
+      '<span class="info"><span class="name"></span>' +
+      '<span class="rate-line" style="display:block"></span>' +
+      '<span class="cost" style="display:block"></span></span>' +
+      '<span class="owned"></span>';
+    btn.addEventListener("click", () => {
+      const info = bulkInfo(i);
+      if (!info.affordable || state.logans < info.total) return;
+      state.logans -= info.total;
+      state.buildings[i] += info.n;
+      sfx("buy");
+      updateShop();
+      updateCounters();
+    });
+    bindTip(btn, () => {
+      if (!buildingDiscovered(i)) return '<div class="tt-name">???</div><div class="tt-desc">A mysterious new helper. Earn more Logans to find out!</div>';
+      const each = b.rate * M.bMult[i] * M.cpsGlobal;
+      return '<div class="tt-name">' + b.icon + " " + b.name + '</div>' +
+        '<div class="tt-desc">' + b.desc + '</div>' +
+        '<div class="tt-line">Each produces <b style="color:var(--gold)">' + fmt(each) + '/s</b></div>' +
+        (state.buildings[i] ? '<div class="tt-line">' + state.buildings[i] + ' owned, producing <b style="color:var(--gold)">' + fmt(each * state.buildings[i]) + '/s</b></div>' : "");
+    });
+    list.appendChild(btn);
     buildingEls.push(btn);
   });
-
-  const uList = $("upgrade-list");
-  UPGRADES.forEach((u, i) => {
-    const btn = makeShopItem(uList, u.icon, u.name, u.desc);
-    btn.addEventListener("click", () => {
-      if (!state.upgrades[i] && state.logans >= u.cost) {
-        state.logans -= u.cost;
-        state.upgrades[i] = true;
-        updateShop();
-        updateCounters();
-      }
-    });
-    upgradeEls.push(btn);
-  });
 }
 
-function updateShop() {
+function buildingDiscovered(i) {
+  return state.buildings[i] > 0 || state.everLogans >= BUILDINGS[i].baseCost / 4;
+}
+
+function updateBuildings() {
+  let shownMystery = false;
   BUILDINGS.forEach((b, i) => {
     const btn = buildingEls[i];
-    const cost = buildingCost(i);
-    const costEl = btn.querySelector(".cost");
-    costEl.textContent = fmt(cost) + " Logans";
-    costEl.classList.toggle("affordable", state.logans >= cost);
-    btn.querySelector(".owned").textContent = state.buildings[i] || "";
-    btn.disabled = state.logans < cost;
-  });
-  UPGRADES.forEach((u, i) => {
-    const btn = upgradeEls[i];
-    if (state.upgrades[i]) { btn.style.display = "none"; return; }
+    const discovered = buildingDiscovered(i);
+    if (!discovered && shownMystery) { btn.style.display = "none"; return; }
     btn.style.display = "";
+    const info = bulkInfo(i);
+    btn.querySelector(".icon").textContent = discovered ? b.icon : "❓";
+    btn.querySelector(".name").textContent = discovered ? b.name : "???";
+    btn.querySelector(".rate-line").textContent = discovered
+      ? "+" + fmt(b.rate * M.bMult[i] * M.cpsGlobal) + "/s each" + (state.buildings[i] ? " — total " + fmt(b.rate * state.buildings[i] * M.bMult[i] * M.cpsGlobal) + "/s" : "")
+      : "It's a secret.";
     const costEl = btn.querySelector(".cost");
-    costEl.textContent = fmt(u.cost) + " Logans";
-    costEl.classList.toggle("affordable", state.logans >= u.cost);
-    btn.disabled = state.logans < u.cost;
+    costEl.textContent = fmt(info.total) + " Logans" + (info.n > 1 ? " (×" + info.n + ")" : "");
+    const ok = info.affordable && state.logans >= info.total;
+    costEl.classList.toggle("affordable", ok);
+    btn.querySelector(".owned").textContent = state.buildings[i] || "";
+    btn.disabled = !ok;
+    if (!discovered) shownMystery = true;
   });
 }
 
-// ===== Counters =====
-function updateCounters() {
-  $("counter").textContent = fmt(Math.floor(state.logans)) + " Logan" + (Math.floor(state.logans) === 1 ? "" : "s");
-  $("cps").textContent = "per second: " + fmt(cps());
-  $("click-power-label").textContent = "+" + fmt(clickPower()) + " per click";
-  $("stat-clicks").textContent = "Clicks: " + fmt(state.totalClicks);
-  $("stat-total").textContent = "All-time Logans: " + fmt(Math.floor(state.totalLogans));
-  document.title = fmt(Math.floor(state.logans)) + " Logan" + (Math.floor(state.logans) === 1 ? "" : "s") + " — Logan Clicker";
+function updateShop() { updateUpgradeGrid(); updateBuildings(); }
+
+// bulk selector
+document.querySelectorAll(".bulk-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    bulkMode = btn.dataset.bulk;
+    document.querySelectorAll(".bulk-btn").forEach(x => x.classList.toggle("active", x === btn));
+    updateBuildings();
+  });
+});
+
+// ============================================================
+// Tabs
+// ============================================================
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === btn));
+    ["shop", "stats", "awards", "options"].forEach(t =>
+      $("tab-" + t).classList.toggle("hidden", t !== btn.dataset.tab));
+    if (btn.dataset.tab === "awards") renderAwards();
+    if (btn.dataset.tab === "stats") updateStats();
+  });
+});
+
+// ============================================================
+// Stats tab
+// ============================================================
+function statLine(k, v, gold) {
+  return '<div class="stat-line"><span class="k">' + k + '</span><span class="v' + (gold ? " gold" : "") + '">' + v + '</span></div>';
 }
 
-// ===== Clicking =====
+function updateStats() {
+  if ($("tab-stats").classList.contains("hidden")) return;
+  $("stats-run").innerHTML =
+    statLine("Logans in bank", fmt(Math.floor(state.logans)), true) +
+    statLine("Earned this run", fmt(Math.floor(state.totalLogans))) +
+    statLine("Per second", fmt(cps()), true) +
+    statLine("Per click", fmt(clickPower())) +
+    statLine("Buildings owned", totalBuildings()) +
+    statLine("Upgrades owned", owned.size);
+  $("stats-life").innerHTML =
+    statLine("Earned all-time", fmt(Math.floor(state.everLogans)), true) +
+    statLine("Total clicks", fmt(state.totalClicks)) +
+    statLine("Golden Logans clicked", state.goldenClicked) +
+    statLine("Achievements", unlockedAch.size + " / " + ACHIEVEMENTS.length) +
+    statLine("Achievement bonus", "+" + unlockedAch.size + "% CPS", true) +
+    statLine("Transcensions", state.ascensions) +
+    statLine("Time played", fmtTime(state.playTime));
+  let bd = "";
+  BUILDINGS.forEach((b, i) => {
+    if (!state.buildings[i]) return;
+    bd += statLine(b.icon + " " + b.name + " ×" + state.buildings[i], fmt(b.rate * state.buildings[i] * M.bMult[i] * M.cpsGlobal) + "/s");
+  });
+  $("building-breakdown").innerHTML = bd || '<div class="stat-line"><span class="k">Nothing yet — buy a building!</span></div>';
+
+  const lvl = prestigeLevelFor(state.everLogans);
+  const gain = Math.max(0, lvl - state.prestigeLevel);
+  const nextAt = 1e7 * Math.pow(lvl + 1, 3);
+  $("prestige-lines").innerHTML =
+    statLine("Golden Glasses", "👓 " + state.prestigeLevel, true) +
+    statLine("CPS bonus", "+" + (state.prestigeLevel * 2) + "%", true) +
+    statLine("Transcend now for", "+" + gain + " 👓") +
+    statLine("Next glass at", fmt(nextAt) + " all-time");
+  const btn = $("ascend-btn");
+  btn.disabled = gain <= 0;
+  btn.textContent = gain > 0 ? "🦋 Transcend (+" + gain + " Golden Glasses)" : "🦋 Transcend (earn more first)";
+}
+
+$("ascend-btn").addEventListener("click", () => {
+  const lvl = prestigeLevelFor(state.everLogans);
+  const gain = lvl - state.prestigeLevel;
+  if (gain <= 0) return;
+  if (!confirm("Transcend now?\n\nYou will gain " + gain + " Golden Glasses (+" + gain * 2 + "% CPS forever), but your Logans, buildings, and upgrades will reset.\n\nAchievements, lifetime stats, and glasses are kept.")) return;
+  state.prestigeLevel = lvl;
+  state.ascensions++;
+  state.logans = 0;
+  state.totalLogans = 0;
+  state.buildings = BUILDINGS.map(() => 0);
+  owned = new Set();
+  buffs = {};
+  recalc();
+  sfx("ascend");
+  flash(0.9);
+  toast("🦋 Transcended! You now own " + state.prestigeLevel + " Golden Glasses (+" + state.prestigeLevel * 2 + "% CPS).", true);
+  updateShop();
+  updateCounters();
+  updateStats();
+  save();
+});
+
+// ============================================================
+// Awards tab
+// ============================================================
+let awardsBuilt = false;
+const awardTiles = {};
+function renderAwards() {
+  const grid = $("awards-grid");
+  if (!awardsBuilt) {
+    awardsBuilt = true;
+    ACHIEVEMENTS.forEach(a => {
+      const d = document.createElement("div");
+      d.className = "award-tile locked";
+      d.textContent = "🔒";
+      bindTip(d, () => unlockedAch.has(a.id)
+        ? '<div class="tt-name">' + a.icon + " " + a.name + '</div><div class="tt-desc">' + a.desc + '</div><div class="tt-line" style="color:var(--green)">Unlocked! +1% CPS</div>'
+        : '<div class="tt-name">???</div><div class="tt-desc">' + a.desc + '</div>');
+      awardTiles[a.id] = d;
+      grid.appendChild(d);
+    });
+  }
+  ACHIEVEMENTS.forEach(a => {
+    const d = awardTiles[a.id];
+    const un = unlockedAch.has(a.id);
+    d.classList.toggle("locked", !un);
+    d.textContent = un ? a.icon : "🔒";
+  });
+  $("awards-summary").textContent = unlockedAch.size + " / " + ACHIEVEMENTS.length + " unlocked — each award gives +1% CPS (current bonus: +" + unlockedAch.size + "%)";
+}
+
+function checkAchievements() {
+  let got = false;
+  ACHIEVEMENTS.forEach(a => {
+    if (unlockedAch.has(a.id)) return;
+    let ok = false;
+    try { ok = a.cond(state); } catch (e) {}
+    if (ok) {
+      unlockedAch.add(a.id);
+      got = true;
+      toast("🏆 Achievement unlocked: " + a.icon + " " + a.name + "!", true);
+      sfx("award");
+    }
+  });
+  if (got) {
+    state.achievements = [...unlockedAch];
+    recalc();
+    if (!$("tab-awards").classList.contains("hidden")) renderAwards();
+  }
+}
+
+// ============================================================
+// Counters / buffs UI
+// ============================================================
+function updateCounters() {
+  const bank = Math.floor(state.logans);
+  $("counter").textContent = fmt(bank) + " Logan" + (bank === 1 ? "" : "s");
+  $("cps").textContent = "per second: " + fmt(cps());
+  $("click-power-label").textContent = "+" + fmt(clickPower()) + " per click" + (M.critChance > 0 ? " (" + Math.round(M.critChance * 100) + "% crit ×" + M.critMult + ")" : "");
+  $("stat-clicks").textContent = "Clicks: " + fmt(state.totalClicks);
+  $("stat-total").textContent = "All-time: " + fmt(Math.floor(state.everLogans));
+  document.title = fmt(bank) + " Logan" + (bank === 1 ? "" : "s") + " — Logan Clicker";
+}
+
+function updateBuffs() {
+  const now = Date.now();
+  let html = "";
+  let anyCps = false;
+  for (const k in buffs) {
+    const b = buffs[k];
+    if (b.until <= now) { delete buffs[k]; continue; }
+    html += '<span class="buff-pill">' + b.label + " — " + Math.ceil((b.until - now) / 1000) + "s</span>";
+    if (b.kind === "cps") anyCps = true;
+  }
+  const row = $("buff-row");
+  if (row.innerHTML !== html) row.innerHTML = html;
+  $("logan").classList.toggle("frenzy-glow", anyCps);
+}
+
+// ============================================================
+// Clicking
+// ============================================================
 const loganImg = $("logan");
 loganImg.addEventListener("pointerdown", e => {
-  const gain = clickPower();
+  let gain = clickPower();
+  let crit = false;
+  if (M.critChance > 0 && Math.random() < M.critChance) { gain *= M.critMult; crit = true; }
   earn(gain);
   state.totalClicks++;
 
@@ -439,71 +1189,158 @@ loganImg.addEventListener("pointerdown", e => {
   const wrap = $("logan-wrap");
   const rect = wrap.getBoundingClientRect();
   const span = document.createElement("span");
-  span.className = "float-num";
-  span.textContent = "+" + fmt(gain);
+  span.className = "float-num" + (crit ? " crit" : "");
+  span.textContent = (crit ? "CRIT! " : "") + "+" + fmt(gain);
   span.style.left = (e.clientX - rect.left + (Math.random() * 30 - 15)) + "px";
   span.style.top = (e.clientY - rect.top - 10) + "px";
   wrap.appendChild(span);
   setTimeout(() => span.remove(), 1000);
 
+  sfx(crit ? "crit" : "click");
   updateCounters();
-  updateShop();
 });
 
-// ===== Logan rain =====
+// ============================================================
+// Logan rain
+// ============================================================
 setInterval(() => {
   if (document.hidden || document.querySelectorAll(".rain").length > 25) return;
   const img = document.createElement("img");
   img.src = "Logan.png";
   img.className = "rain";
+  const size = 26 + Math.random() * 34;
+  img.style.width = img.style.height = size + "px";
   img.style.left = Math.random() * 100 + "vw";
-  img.style.animationDuration = (5 + Math.random() * 5) + "s";
+  img.style.animationDuration = (5 + Math.random() * 6) + "s";
   document.body.appendChild(img);
-  setTimeout(() => img.remove(), 11000);
-}, 1200);
+  setTimeout(() => img.remove(), 12000);
+}, 1100);
 
-// ===== Golden Logan =====
+// ============================================================
+// Golden Logan
+// ============================================================
 const goldenEl = $("golden");
 let goldenTimeout;
 
 function scheduleGolden() {
   clearTimeout(goldenTimeout);
-  goldenTimeout = setTimeout(spawnGolden, (60 + Math.random() * 90) * 1000);
+  goldenTimeout = setTimeout(spawnGolden, (60 + Math.random() * 90) * 1000 * M.goldenFreq);
 }
 
 function spawnGolden() {
-  goldenEl.style.left = (10 + Math.random() * 75) + "vw";
+  goldenEl.style.left = (8 + Math.random() * 76) + "vw";
   goldenEl.style.top = (12 + Math.random() * 70) + "vh";
   goldenEl.style.display = "block";
-  goldenTimeout = setTimeout(() => { goldenEl.style.display = "none"; scheduleGolden(); }, 12000);
+  goldenTimeout = setTimeout(() => { goldenEl.style.display = "none"; scheduleGolden(); }, 12000 * M.goldenDur);
 }
 
 goldenEl.addEventListener("pointerdown", () => {
   goldenEl.style.display = "none";
-  if (Math.random() < 0.5) {
-    const bonus = Math.max(Math.floor(cps() * 60 + state.logans * 0.1), 100);
+  clearTimeout(goldenTimeout);
+  state.goldenClicked++;
+  sfx("golden");
+  flash(0.35);
+  const roll = Math.random();
+  if (roll < 0.45) {
+    const bonus = Math.max(Math.floor(Math.min(state.logans * 0.15, cps() * 900)), 100);
     earn(bonus);
     toast("✨ Golden Logan! Lucky! +" + fmt(bonus) + " Logans!");
+  } else if (roll < 0.9) {
+    buffs.frenzy = { label: "✨ Frenzy ×7", kind: "cps", mult: 7, until: Date.now() + 20000 * M.goldenDur };
+    toast("✨ Golden Logan! FRENZY — production ×7 for " + Math.round(20 * M.goldenDur) + " seconds!");
   } else {
-    frenzyUntil = Date.now() + 20000;
-    toast("✨ Golden Logan! FRENZY — everything x7 for 20 seconds!");
+    buffs.storm = { label: "⚡ Click Storm ×77", kind: "click", mult: 77, until: Date.now() + 13000 * M.goldenDur };
+    toast("⚡ Golden Logan! CLICK STORM — clicks ×77 for " + Math.round(13 * M.goldenDur) + " seconds! GO GO GO!");
   }
   updateCounters();
   updateShop();
   scheduleGolden();
 });
 
-function updateFrenzyUI() {
-  const active = Date.now() < frenzyUntil;
-  $("frenzy-banner").style.display = active ? "block" : "none";
-  loganImg.classList.toggle("frenzy-glow", active);
-  if (active) $("frenzy-time").textContent = Math.ceil((frenzyUntil - Date.now()) / 1000);
+// ============================================================
+// News ticker
+// ============================================================
+let lastLine = -1;
+function nextTicker() {
+  const t = $("ticker");
+  t.classList.add("fade");
+  setTimeout(() => {
+    let i;
+    do { i = Math.floor(Math.random() * TICKER_LINES.length); } while (i === lastLine);
+    lastLine = i;
+    let line = TICKER_LINES[i];
+    if (Math.random() < 0.15 && state.everLogans > 1000) {
+      line = "The Logan economy is now worth " + fmt(Math.floor(state.everLogans)) + " Logans. Analysts say: \"nice.\"";
+    }
+    $("ticker-text").textContent = "📰 " + line;
+    t.classList.remove("fade");
+  }, 500);
 }
 
-// ===== Save / load =====
+// ============================================================
+// Options
+// ============================================================
+function updateSoundBtn() {
+  $("opt-sound").textContent = state.options.sound ? "🔊 Sound: On" : "🔇 Sound: Off";
+}
+$("opt-sound").addEventListener("click", () => {
+  state.options.sound = !state.options.sound;
+  updateSoundBtn();
+  sfx("buy");
+});
+
+function encodeSave() {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(serialize()))));
+}
+$("opt-export").addEventListener("click", () => {
+  save();
+  openModal("Export save — copy this text somewhere safe", encodeSave(), false, null);
+});
+$("opt-import").addEventListener("click", () => {
+  openModal("Import save — paste your save text below", "", true, text => {
+    try {
+      const json = decodeURIComponent(escape(atob(text.trim())));
+      const s = JSON.parse(json);
+      if (typeof s.logans !== "number") throw new Error("bad save");
+      localStorage.setItem(SAVE_KEY, json);
+      location.reload();
+    } catch (e) {
+      alert("That doesn't look like a valid Logan Clicker save.");
+    }
+  });
+});
+$("opt-wipe").addEventListener("click", () => {
+  if (!confirm("Wipe your Logan Clicker save completely and start over?\nThis erases EVERYTHING including achievements and Golden Glasses.")) return;
+  window.removeEventListener("beforeunload", save);
+  clearInterval(autosaveTimer);
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  location.reload();
+});
+
+// ============================================================
+// Save / load (v1-compatible)
+// ============================================================
+function serialize() {
+  return {
+    version: 2,
+    logans: state.logans,
+    totalLogans: state.totalLogans,
+    everLogans: state.everLogans,
+    totalClicks: state.totalClicks,
+    goldenClicked: state.goldenClicked,
+    buildings: state.buildings,
+    upgradesOwned: [...owned],
+    achievements: [...unlockedAch],
+    ascensions: state.ascensions,
+    prestigeLevel: state.prestigeLevel,
+    playTime: state.playTime,
+    options: state.options,
+    savedAt: Date.now(),
+  };
+}
+
 function save() {
-  state.savedAt = Date.now();
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) { /* private mode etc. */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(serialize())); } catch (e) {}
 }
 
 function load() {
@@ -514,13 +1351,31 @@ function load() {
     const s = JSON.parse(raw);
     state.logans = s.logans || 0;
     state.totalLogans = s.totalLogans || 0;
+    state.everLogans = (typeof s.everLogans === "number") ? s.everLogans : (s.totalLogans || 0);
     state.totalClicks = s.totalClicks || 0;
+    state.goldenClicked = s.goldenClicked || 0;
+    state.ascensions = s.ascensions || 0;
+    state.prestigeLevel = s.prestigeLevel || 0;
+    state.playTime = s.playTime || 0;
+    if (s.options && typeof s.options.sound === "boolean") state.options.sound = s.options.sound;
     BUILDINGS.forEach((_, i) => state.buildings[i] = (s.buildings && s.buildings[i]) || 0);
-    UPGRADES.forEach((_, i) => state.upgrades[i] = !!(s.upgrades && s.upgrades[i]));
+
+    // upgrades: v2 stores ids; v1 stored a boolean array
+    if (Array.isArray(s.upgradesOwned)) {
+      s.upgradesOwned.forEach(id => { if (UPGRADE_BY_ID[id]) owned.add(id); });
+    } else if (Array.isArray(s.upgrades)) {
+      s.upgrades.forEach((got, i) => { if (got && LEGACY_UPGRADE_IDS[i]) owned.add(LEGACY_UPGRADE_IDS[i]); });
+    }
+    if (Array.isArray(s.achievements)) {
+      const valid = new Set(ACHIEVEMENTS.map(a => a.id));
+      s.achievements.forEach(id => { if (valid.has(id)) unlockedAch.add(id); });
+    }
+    state.achievements = [...unlockedAch];
+    recalc();
 
     // offline earnings, capped at 1 hour
     const elapsed = Math.min((Date.now() - (s.savedAt || Date.now())) / 1000, 3600);
-    const offline = cps() * elapsed;
+    const offline = cpsRaw() * elapsed;
     if (offline >= 1) {
       earn(offline);
       toast("While you were gone, Logan earned " + fmt(Math.floor(offline)) + " Logans!");
@@ -528,35 +1383,48 @@ function load() {
   } catch (e) { /* corrupt save — start fresh */ }
 }
 
-$("reset-btn").addEventListener("click", () => {
-  if (!confirm("Wipe your Logan Clicker save and start over?")) return;
-  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
-  location.reload();
-});
-
-setInterval(save, 10000);
+const autosaveTimer = setInterval(save, 10000);
 window.addEventListener("beforeunload", save);
 
-// ===== Main loop =====
-let lastTick = performance.now();
-function tick(now) {
-  const dt = Math.min((now - lastTick) / 1000, 1);
-  lastTick = now;
+// ============================================================
+// Main loop
+// ============================================================
+// Accrual is wall-clock based and driven by BOTH rAF (smooth while visible)
+// and a 1s interval (keeps producing while the tab is hidden, where rAF stops).
+let lastAccrue = Date.now();
+function accrue() {
+  const now = Date.now();
+  const dt = Math.min((now - lastAccrue) / 1000, 3600);
+  if (dt <= 0) return;
+  lastAccrue = now;
+  state.playTime += dt;
   const rate = cps();
   if (rate > 0) earn(rate * dt);
+}
+setInterval(() => { accrue(); if (document.hidden) return; updateCounters(); updateBuffs(); }, 1000);
+
+function tick() {
+  accrue();
   updateCounters();
-  updateFrenzyUI();
+  updateBuffs();
   requestAnimationFrame(tick);
 }
 
-// shop affordability refresh (cheaper than every frame)
 setInterval(updateShop, 250);
+setInterval(updateStats, 500);
+setInterval(checkAchievements, 1000);
+setInterval(nextTicker, 9000);
 
-// ===== Boot =====
-initShop();
+// ============================================================
+// Boot
+// ============================================================
+initBuildings();
+recalc();
 load();
+updateSoundBtn();
 updateShop();
 updateCounters();
+nextTicker();
 scheduleGolden();
 requestAnimationFrame(tick);
 </script>
